@@ -1,0 +1,68 @@
+{
+  "name": "mixmind",
+  "version": "1.1.0",
+  "description": "AI-powered Ableton mixer controller",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "publish:mac": "electron-builder --mac --publish always"
+  },
+  "build": {
+    "appId": "com.mixmind.app",
+    "productName": "MixMind",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "bridge.py",
+      "requirements.txt",
+      "assets/**/*"
+    ],
+    "extraResources": [
+      { "from": "bridge.py",        "to": "bridge.py" },
+      { "from": "requirements.txt", "to": "requirements.txt" }
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "assets/icon.png",
+      "target": [
+        { "target": "dmg", "arch": ["arm64", "x64"] },
+        { "target": "zip", "arch": ["arm64", "x64"] }
+      ],
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "title": "MixMind",
+      "background": null,
+      "window": { "width": 540, "height": 380 }
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [{ "target": "nsis" }]
+    },
+    "linux": {
+      "category": "Audio",
+      "icon": "assets/icon.png",
+      "target": [{ "target": "AppImage" }]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "MitchCollinge",
+      "repo": "mixmind-releases"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.0"
+  }
+}

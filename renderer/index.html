@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://api.anthropic.com; img-src 'self' data:;" />
+<title>MixMind</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:      #080808;
+  --s1:      #0f0f0f;
+  --s2:      #161616;
+  --border:  #1e1e1e;
+  --border2: #2a2a2a;
+  --accent:  #ff6b35;
+  --a2:      #ffd166;
+  --green:   #06d6a0;
+  --blue:    #118ab2;
+  --text:    #f0ece4;
+  --muted:   #555;
+  --muted2:  #888;
+  --error:   #ef476f;
+  --r: 5px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── TITLEBAR (macOS hidden inset) ── */
+.titlebar {
+  height: 28px;
+  -webkit-app-region: drag;
+  background: var(--bg);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 80px; /* space for traffic lights */
+  border-bottom: 1px solid var(--border);
+}
+
+.titlebar-label {
+  font-size: 11px;
+  font-family: 'Inconsolata', monospace;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  font-weight: 600;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; height: calc(100vh - 28px); flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ══════════════════════════════════════
+   SETUP SCREEN
+══════════════════════════════════════ */
+#setup { overflow-y: auto; }
+
+.setup-inner {
+  padding: 32px 36px 48px;
+  max-width: 860px;
+}
+
+.wordmark {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--accent);
+  font-family: 'Inconsolata', monospace;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.live-dot.ok  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.live-dot.err { background: var(--error); }
+.live-dot.spin { animation: blink 1s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.setup-title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-top: 14px;
+}
+
+.setup-title em { color: var(--accent); font-style: normal; }
+
+.setup-sub {
+  color: var(--muted2);
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* ── Field rows ── */
+.field-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.flabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  font-family: 'Inconsolata', monospace;
+  text-transform: uppercase;
+}
+
+input[type="password"], input[type="text"], select {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 9px 13px;
+  border-radius: var(--r);
+  font-family: 'Inconsolata', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+input:focus, select:focus { border-color: var(--accent); }
+input[type="password"] { width: 280px; }
+.url-input { width: 170px; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  padding: 9px 16px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Inconsolata', monospace;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  height: 38px;
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Section label ── */
+.slabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  font-family: 'Inconsolata', monospace;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.slabel::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* ── Track cards ── */
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.tcard {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px;
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+.tcard:hover { border-color: var(--border2); }
+
+.tcard-num {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Inconsolata', monospace;
+  margin-bottom: 7px;
+}
+
+.tcard-name {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 0 6px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.tcard-name:focus { border-color: var(--accent); }
+.tcard-name::placeholder { color: var(--muted); font-weight: 400; }
+
+.tcard-type {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Inconsolata', monospace;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.tcard-remove {
+  position: absolute;
+  top: 9px; right: 9px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.tcard-remove:hover { color: var(--error); }
+
+.track-btns { display: flex; gap: 10px; }
+
+/* ── Session meta ── */
+.meta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ── Start ── */
+.start-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 13px 36px;
+  border-radius: var(--r);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary:hover { background: #ff825a; transform: translateY(-1px); }
+
+.bridge-note {
+  font-size: 12px;
+  color: var(--muted2);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.5;
+}
+
+.bridge-note a {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* ══════════════════════════════════════
+   MIX SCREEN
+══════════════════════════════════════ */
+#mixer { background: var(--bg); }
+
+.mix-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  height: 46px;
+  border-bottom: 1px solid var(--border);
+  background: var(--s1);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.mix-wordmark {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  white-space: nowrap;
+  font-family: 'Inconsolata', monospace;
+}
+
+.track-pills {
+  flex: 1;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 4px;
+}
+
+.track-pills::-webkit-scrollbar { display: none; }
+
+.tpill {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  font-family: 'Inconsolata', monospace;
+  color: var(--muted2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* type colours */
+.tpill[data-t="kick"]   { border-color:#ff6b3566;color:#ff6b35; }
+.tpill[data-t="bass"]   { border-color:#118ab266;color:#118ab2; }
+.tpill[data-t="sub"]    { border-color:#0077b666;color:#0077b6; }
+.tpill[data-t="snare"]  { border-color:#ffd16666;color:#ffd166; }
+.tpill[data-t="hihat"]  { border-color:#06d6a066;color:#06d6a0; }
+.tpill[data-t="clap"]   { border-color:#ffd16666;color:#ffd166; }
+.tpill[data-t="lead"]   { border-color:#c77dff66;color:#c77dff; }
+.tpill[data-t="pad"]    { border-color:#48cae466;color:#48cae4; }
+.tpill[data-t="vocals"] { border-color:#f7258566;color:#f72585; }
+.tpill[data-t="guitar"] { border-color:#fb850066;color:#fb8500; }
+.tpill[data-t="keys"]   { border-color:#b5e48c66;color:#b5e48c; }
+.tpill[data-t="master"] { border-color:#ffffff33;color:#ffffffaa; }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.status-badge {
+  font-size: 11px;
+  font-family: 'Inconsolata', monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted2);
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  padding: 4px 12px;
+  border-radius: var(--r);
+  font-size: 11px;
+  font-family: 'Inconsolata', monospace;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+/* quick chips */
+.quick-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.quick-bar::-webkit-scrollbar { display: none; }
+
+.qchip {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--s1);
+  color: var(--muted2);
+  cursor: pointer;
+  font-family: 'Inconsolata', monospace;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.qchip:hover { border-color: var(--a2); color: var(--a2); background: var(--s2); }
+
+/* chat */
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.msg { display: flex; gap: 10px; max-width: 820px; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+.av {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800;
+  font-family: 'Inconsolata', monospace;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+.av.ai  { background: var(--accent); color: #fff; }
+.av.usr { background: var(--s2); color: var(--a2); border: 1px solid var(--a2); }
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: var(--r);
+  line-height: 1.65;
+  font-size: 13px;
+  max-width: 640px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.msg.ai   .bubble { background: var(--s1); border: 1px solid var(--border); }
+.msg.user .bubble { background: var(--s2); border: 1px solid var(--border2); }
+
+.agroup { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+
+.acard {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 11px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: var(--r);
+  font-family: 'Inconsolata', monospace;
+  font-size: 11px;
+}
+
+.acard.err  { border-left-color: var(--error); }
+.acard.warn { border-left-color: var(--a2); }
+.acard .lbl { flex: 1; color: var(--text); }
+.acard .osc { color: var(--muted); font-size: 10px; }
+
+.tip-block {
+  margin-top: 10px;
+  padding: 10px 13px;
+  background: #0a1a12;
+  border: 1px solid #1a3a28;
+  border-radius: var(--r);
+  font-size: 12px;
+  color: #7dcfb6;
+  line-height: 1.65;
+}
+
+.tip-block strong { color: var(--green); }
+
+.typing-msg { display: flex; gap: 10px; }
+
+.dots {
+  display: flex; gap: 4px; align-items: center;
+  padding: 11px 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: d 1.2s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes d {
+  0%,80%,100% { transform:translateY(0); opacity:.3; }
+  40%          { transform:translateY(-5px); opacity:1; }
+}
+
+/* input row */
+.input-row {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: flex-end;
+  background: var(--s1);
+  flex-shrink: 0;
+}
+
+textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 9px 13px;
+  border-radius: var(--r);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  max-height: 110px;
+  overflow-y: auto;
+  transition: border-color .15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+
+.send-btn {
+  background: var(--accent);
+  border: none; color: #fff;
+  padding: 9px 20px;
+  border-radius: var(--r);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; height: 40px;
+  transition: all .15s; white-space: nowrap;
+}
+
+.send-btn:hover    { background: #ff825a; }
+.send-btn:disabled { opacity: .4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- macOS traffic-light space -->
+<div class="titlebar">
+  <span class="titlebar-label">MIXMIND</span>
+  <span id="versionLabel" style="font-size:10px;font-family:Inconsolata,monospace;color:var(--muted);margin-left:8px"></span>
+  <div id="updateBanner" style="display:none;margin-left:auto;margin-right:12px;font-size:11px;font-family:Inconsolata,monospace;color:var(--accent2);display:none;align-items:center;gap:8px">
+    <span id="updateMsg"></span>
+    <button onclick="window.mixmind.installUpdate()" style="background:var(--accent2);border:none;color:#000;padding:2px 8px;border-radius:3px;font-size:10px;font-family:Inconsolata,monospace;cursor:pointer;font-weight:700">RESTART</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SETUP SCREEN
+══════════════════════════════════════ -->
+<div class="screen active" id="setup">
+<div class="setup-inner">
+
+  <div class="wordmark">
+    <div class="live-dot spin" id="setupDot"></div>
+    MixMind
+    <span id="setupBridgeText" style="color:var(--muted);font-weight:400">starting bridge…</span>
+  </div>
+
+  <div class="setup-title">Label your tracks.<br><em>Let AI mix them.</em></div>
+  <div class="setup-sub">Tell MixMind what each track is — it applies professional<br>gain staging, EQ guidance, panning rules, and mastering targets automatically.</div>
+
+  <div class="divider"></div>
+
+  <!-- API Key -->
+  <div class="slabel">Configuration</div>
+  <div class="field-row" style="margin-bottom:20px">
+    <div class="field">
+      <div class="flabel">Anthropic API Key</div>
+      <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- Session meta -->
+  <div class="slabel">Session</div>
+  <div class="meta-row" style="margin-bottom:24px">
+    <div class="field">
+      <div class="flabel">Genre</div>
+      <select id="genre">
+        <option>Electronic / Dance</option>
+        <option>Hip-Hop / Trap</option>
+        <option>Pop</option>
+        <option>Rock / Band</option>
+        <option>Ambient / Experimental</option>
+        <option>R&B / Soul</option>
+        <option>Film / Cinematic</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="flabel">Mastering Target</div>
+      <select id="masterTarget">
+        <option value="streaming">Streaming (−14 LUFS)</option>
+        <option value="club">Club / DJ (−9 LUFS)</option>
+        <option value="cd">CD (−10 LUFS)</option>
+        <option value="film">Film (−24 LUFS)</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="flabel">Mix Style</div>
+      <select id="mixStyle">
+        <option value="balanced">Balanced & Natural</option>
+        <option value="punchy">Punchy & Upfront</option>
+        <option value="wide">Wide & Spacious</option>
+        <option value="vintage">Warm & Vintage</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tracks -->
+  <div class="slabel">Tracks</div>
+  <div class="tracks-grid" id="tracksGrid"></div>
+  <div class="track-btns" style="margin-bottom:4px">
+    <button class="btn-ghost" onclick="addTrack()">+ Add Track</button>
+    <button class="btn-ghost" onclick="autoFill()">⚡ Auto-fill</button>
+    <button class="btn-ghost" onclick="clearTracks()">✕ Clear</button>
+  </div>
+
+  <div class="start-row">
+    <button class="btn-primary" onclick="startSession()">Start Mixing →</button>
+    <div class="bridge-note" id="bridgeNote">
+      Waiting for bridge…<br>
+      <a onclick="openAbletonOSC()">↗ AbletonOSC setup guide</a>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MIX SCREEN
+══════════════════════════════════════ -->
+<div class="screen" id="mixer">
+  <div class="mix-header">
+    <div class="mix-wordmark">MIXMIND</div>
+    <div class="track-pills" id="trackPills"></div>
+    <div class="header-right">
+      <div class="status-badge">
+        <div class="live-dot" id="mixDot"></div>
+        <span id="mixStatus">–</span>
+      </div>
+      <button class="btn-back" onclick="goSetup()">← Setup</button>
+    </div>
+  </div>
+
+  <div class="quick-bar" id="quickBar"></div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="input-row">
+    <textarea id="chatInput" rows="1"
+      placeholder="e.g. 'Gain stage everything for a club mix' or 'The kick and bass are clashing'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMsg()">SEND</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let tracks  = []
+let session = {}
+let chatHistory = []
+let bridgeAlive = false
+
+const TRACK_TYPES = [
+  'kick','snare','hihat','clap','perc',
+  'bass','sub','lead','pad','pluck','arp','chord','stab',
+  'vocals','sample','guitar','keys','piano',
+  'fx','foley','master','other'
+]
+
+// ════════════════════════════════════════
+// BRIDGE STATUS
+// ════════════════════════════════════════
+window.mixmind.onBridgeStatus(({ ok }) => {
+  bridgeAlive = ok
+  updateBridgeDots()
+})
+
+async function updateBridgeDots() {
+  const dot  = document.getElementById('setupDot')
+  const txt  = document.getElementById('setupBridgeText')
+  const mdot = document.getElementById('mixDot')
+  const mst  = document.getElementById('mixStatus')
+  const note = document.getElementById('bridgeNote')
+
+  dot.className  = 'live-dot ' + (bridgeAlive ? 'ok' : 'err')
+  mdot.className = 'live-dot ' + (bridgeAlive ? 'ok' : 'err')
+
+  if (bridgeAlive) {
+    txt.textContent = 'bridge connected ✓'
+    txt.style.color = 'var(--green)'
+    mst.textContent = 'live'
+    note.innerHTML  = `Bridge running · <a onclick="openAbletonOSC()">↗ AbletonOSC docs</a>`
+  } else {
+    txt.textContent = 'bridge offline'
+    txt.style.color = 'var(--error)'
+    mst.textContent = 'offline'
+    note.innerHTML  = `Bridge starting… · <a onclick="openAbletonOSC()">↗ AbletonOSC setup</a>`
+  }
+}
+
+// Initial check
+;(async () => {
+  const s = await window.mixmind.getBridgeStatus()
+  bridgeAlive = s.ok
+  updateBridgeDots()
+})()
+
+function openAbletonOSC() {
+  window.mixmind.openExternal('https://github.com/ideoforms/AbletonOSC')
+}
+
+// ════════════════════════════════════════
+// SETUP
+// ════════════════════════════════════════
+function renderTracks() {
+  const grid = document.getElementById('tracksGrid')
+  grid.innerHTML = ''
+  tracks.forEach((t, i) => {
+    const d = document.createElement('div')
+    d.className = 'tcard'
+    d.innerHTML = `
+      <button class="tcard-remove" onclick="removeTrack(${i})">✕</button>
+      <div class="tcard-num">TRACK ${i}</div>
+      <input class="tcard-name" placeholder="e.g. Kick, Bass, Vox"
+        value="${t.name}" oninput="tracks[${i}].name=this.value" />
+      <select class="tcard-type" onchange="tracks[${i}].type=this.value">
+        ${TRACK_TYPES.map(tp => `<option value="${tp}" ${t.type===tp?'selected':''}>${tp.charAt(0).toUpperCase()+tp.slice(1)}</option>`).join('')}
+      </select>`
+    grid.appendChild(d)
+  })
+}
+
+function addTrack()   { tracks.push({ name:'', type:'other' }); renderTracks() }
+function removeTrack(i) { tracks.splice(i,1); renderTracks() }
+function clearTracks() { tracks = []; renderTracks() }
+
+function autoFill() {
+  tracks = [
+    { name:'Kick',      type:'kick'   },
+    { name:'Snare',     type:'snare'  },
+    { name:'Hi-Hats',   type:'hihat'  },
+    { name:'Bass',      type:'bass'   },
+    { name:'Lead Synth',type:'lead'   },
+    { name:'Pad',       type:'pad'    },
+    { name:'FX',        type:'fx'     },
+    { name:'Master',    type:'master' },
+  ]
+  renderTracks()
+}
+
+async function startSession() {
+  const key = document.getElementById('apiKey').value.trim()
+  if (!key)           { alert('Enter your Anthropic API key.'); return }
+  if (!tracks.length) { alert('Add at least one track.'); return }
+
+  // Persist key
+  await window.mixmind.store.set('apiKey', key)
+
+  session = {
+    apiKey:       key,
+    genre:        document.getElementById('genre').value,
+    masterTarget: document.getElementById('masterTarget').value,
+    mixStyle:     document.getElementById('mixStyle').value,
+    tracks:       JSON.parse(JSON.stringify(tracks)),
+  }
+
+  initMixer()
+  document.getElementById('setup').classList.remove('active')
+  document.getElementById('mixer').classList.add('active')
+}
+
+function goSetup() {
+  document.getElementById('mixer').classList.remove('active')
+  document.getElementById('setup').classList.add('active')
+}
+
+// ════════════════════════════════════════
+// MIXER INIT
+// ════════════════════════════════════════
+function initMixer() {
+  chatHistory = []
+
+  // Track pills
+  document.getElementById('trackPills').innerHTML =
+    session.tracks.map((t,i) =>
+      `<div class="tpill" data-t="${t.type}">T${i} ${t.name||t.type}</div>`
+    ).join('')
+
+  // Quick chips
+  const quicks = [
+    ['🎚 Gain stage all',     'Do a full gain staging pass on all tracks, applying professional level targets for each track type and my genre.'],
+    ['🥁 Balance drums',      'Balance all the drum tracks against each other for the genre and mix style.'],
+    ['⚡ Fix low-end clash',  'The kick and bass are likely clashing. Give me gain staging and panning advice to separate them cleanly.'],
+    ['↔ Pan everything',     'Apply stereo panning rules for every track in my session.'],
+    ['🔊 Master levels',      'Set all track volumes to hit the mastering target. Walk me through your decisions.'],
+    ['📦 List devices T0',    'List all devices currently on track 0.'],
+    ['🎛 EQ Eight on kick',   'Add an EQ Eight to track 0 (kick), then tell me what parameters to set for a punchy kick in this genre.'],
+    ['🗜 Compress the drums', 'Add a Glue Compressor to the kick and snare tracks. Explain the settings you recommend.'],
+    ['🔒 Add master limiter', 'Add a Limiter to the last track (master). Set the ceiling to hit my mastering target.'],
+    ['📊 Full analysis',      'Analyse my full session and give me a complete mixing strategy with device recommendations.'],
+    ['▶ Play',                'Play the song.'],
+    ['■ Stop',                'Stop the song.'],
+  ]
+
+  const _qbar = document.getElementById('quickBar')
+  _qbar.innerHTML = ''
+  quicks.forEach(([l, p]) => {
+    const _btn = document.createElement('button')
+    _btn.className = 'qchip'
+    _btn.textContent = l
+    _btn.addEventListener('click', () => sendMsg(p))
+    _qbar.appendChild(_btn)
+  })
+
+  // Clear chat
+  const chat = document.getElementById('chat')
+  chat.innerHTML = ''
+
+  const tgt = { streaming:'−14 LUFS', club:'−9 LUFS', cd:'−10 LUFS', film:'−24 LUFS' }
+  const trackList = session.tracks.map((t,i) => `T${i}: <strong>${t.name||t.type}</strong> (${t.type})`).join(' · ')
+
+  addBubble('ai', `Session loaded. I know your tracks and I'll apply pro mixing rules to every decision.<br><br>
+    <span style="color:var(--muted2);font-size:11px;font-family:Inconsolata,monospace;line-height:1.8">
+    ${trackList}<br>
+    Genre: ${session.genre} &nbsp;·&nbsp; Target: ${tgt[session.masterTarget]} &nbsp;·&nbsp; Style: ${session.mixStyle}
+    </span><br><br>
+    Try <em>"Gain stage everything"</em> or <em>"The kick and bass are clashing — fix it."</em>`)
+}
+
+// ════════════════════════════════════════
+// SYSTEM PROMPT
+// ════════════════════════════════════════
+function buildSystem() {
+  const { tracks, genre, masterTarget, mixStyle } = session
+  const targets = {
+    streaming: '-14 LUFS / -1dBTP true peak',
+    club:      '-9 LUFS / -0.5dBTP true peak',
+    cd:        '-10 LUFS / -0.3dBTP true peak',
+    film:      '-24 LUFS / -2dBTP true peak',
+  }
+
+  const trackMap = tracks.map((t,i) =>
+    `  Track ${i}: "${t.name||'(unnamed)'}" — type: ${t.type}`
+  ).join('\n')
+
+  return `You are MixMind, an expert audio engineer and mixing assistant controlling Ableton Live via a local OSC bridge.
+
+## SESSION
+Genre: ${genre}
+Mastering target: ${targets[masterTarget]}
+Mix style: ${mixStyle}
+
+## TRACKS (0-indexed, matching Ableton)
+${trackMap}
+
+## GAIN STAGING (Ableton volume 0.0–1.0)
+dB to linear: 0dB=0.85, -3dB=0.71, -6dB=0.60, -9dB=0.50, -12dB=0.42, -15dB=0.35, -18dB=0.28, -24dB=0.18
+Targets by type:
+- kick:   -6 to -3dB (0.60–0.71)   anchor, needs headroom
+- snare:  -9 to -6dB (0.50–0.60)   punchy, just under kick
+- hihat:  -18 to -12dB (0.28–0.42) airy, never dominant
+- clap:   -12 to -9dB (0.42–0.50)
+- perc:   -24 to -18dB (0.18–0.28) texture only
+- bass:   -9 to -6dB (0.50–0.60)   lock with kick, never louder
+- sub:    -12 to -9dB (0.42–0.50)  felt not heard
+- lead:   -6 to -3dB (0.60–0.71)   front of mix
+- pad:    -18 to -12dB (0.28–0.42) background texture
+- pluck:  -12 to -9dB (0.42–0.50)
+- arp:    -15 to -12dB (0.35–0.42)
+- chord:  -15 to -12dB (0.35–0.42)
+- stab:   -9 to -6dB (0.50–0.60)
+- vocals: -6 to -3dB (0.60–0.71)   above pads, clear
+- sample: -12 to -9dB (0.42–0.50)
+- guitar: -9 to -6dB (0.50–0.60)
+- keys:   -12 to -9dB (0.42–0.50)
+- piano:  -9 to -6dB (0.50–0.60)
+- fx:     -24 to -18dB (0.18–0.28) ear candy
+- foley:  -30 to -24dB (0.12–0.18)
+- master: NEVER touch (leave at 0.85)
+- other:  -12dB (0.42)
+
+Mix style modifiers:
+- punchy: kick/snare +1–2dB above targets
+- wide: spread elements, gentle volume compensation
+- vintage: louder mids, gentle high-frequency rolloff
+- balanced: textbook targets
+
+## PANNING (−1.0 left … 0.0 center … +1.0 right)
+Note: panning endpoint is /track/pan — include pan actions when relevant.
+- kick, bass, sub, lead, vocals, master → 0.0
+- snare, clap → 0.0 to ±0.05
+- open hihat → 0.2–0.4 right, closed hihat → −0.1 to −0.2 left
+- pads → ±0.3–0.6 (wide)
+- guitar doubles → ±0.6–1.0 hard pan
+- keys/piano → ±0.2–0.4
+- arp/pluck → ±0.2–0.35 opposite to lead
+- fx → opposite side from dominant elements
+
+## EQ / COMPRESSION ADVICE (give as tips — cannot control via OSC)
+- kick: boost 60–80Hz, cut 300–500Hz mud, boost 2–5kHz click
+- bass: boost 80–120Hz, cut 200–400Hz mud, high-pass below 40Hz
+- kick/bass clash: sidechain compress bass to kick, or dynamic EQ at 60–80Hz
+- snare: boost 200Hz body, cut 400–600Hz box, boost 4–8kHz snap
+- hihat: high-pass above 8kHz
+- lead: boost 1–3kHz presence, cut 200–400Hz buildup
+- pad: gentle low-pass at 8–12kHz, high-pass below 200–400Hz
+- vocals: high-pass below 100Hz, boost 3–5kHz, de-ess at 6–8kHz
+
+## MASTERING TARGETS
+- streaming (−14 LUFS): headroom, −1dBTP peak, dynamic range preserved
+- club (−9 LUFS): loud and punchy, maximise perceived loudness
+- cd (−10 LUFS): balanced loudness
+- film (−24 LUFS): wide dynamics, preserve transients
+
+## BRIDGE ENDPOINTS
+
+### Transport & Tracks
+POST /play
+POST /stop
+POST /tempo           {bpm: number}
+POST /metronome       {on: 0|1}
+POST /clip/play       {track, clip}
+POST /clip/stop       {track}
+POST /track/volume    {track, volume: 0.0–1.0}
+POST /track/pan       {track, pan: −1.0 to 1.0}
+POST /track/mute      {track, mute: 0|1}
+POST /track/solo      {track, solo: 0|1}
+POST /track/arm       {track, arm: 0|1}
+POST /scene/play      {scene}
+POST /undo
+POST /redo
+
+### Device Control
+GET  /track/devices            ?track=0           → lists devices on track with index+name
+GET  /device/parameters        ?track=0&device=0  → lists all params with name/value/min/max
+GET  /device/parameter/get     ?track=0&device=0&param=0
+POST /device/parameter/set     {track, device, param, value}
+POST /device/add               {track, device: "EQ Eight"}  (requires device_loader.py patch)
+POST /device/enable            {track, device, on: 0|1}
+
+### Supported device names for /device/add:
+EQ Eight, Compressor, Glue Compressor, Multiband Dynamics, Limiter,
+Reverb, Hybrid Reverb, Echo, Delay, Ping Pong Delay, Grain Delay,
+Chorus, Flanger, Phaser, Saturator, Redux, Vinyl Distortion,
+Dynamic Tube, Overdrive, Amp, Cabinet, Resonators, Spectrum,
+Utility, Auto Filter, Auto Pan, Beat Repeat, Looper, Drum Buss,
+Pedal, Shifter, Spectral Resonator, Spectral Blur
+
+## EQ EIGHT PARAMETER MAP (device=0 if first device on track)
+param 0:  Device On (1=on, 0=off)
+param 1:  Band 1 Freq (Hz, 10–22000)
+param 2:  Band 1 Gain (dB, −15 to +15)
+param 3:  Band 1 Q
+param 4:  Band 1 On
+param 5:  Band 2 Freq
+param 6:  Band 2 Gain
+param 7:  Band 2 Q
+param 8:  Band 2 On
+... (pattern repeats, 4 params per band × 8 bands)
+Note: First read /device/parameters to get exact indices for the session.
+
+## COMPRESSOR PARAMETER MAP
+param 0:  Device On
+param 1:  Threshold (dB)
+param 2:  Ratio
+param 3:  Attack (ms)
+param 4:  Release (ms)
+param 5:  Gain (output, dB)
+param 6:  Knee
+param 7:  Lookahead
+Note: Always read /device/parameters first to confirm actual indices.
+
+## LIMITER PARAMETER MAP
+param 0:  Device On
+param 1:  Gain (input gain dB)
+param 2:  Ceiling (dBTP, e.g. −1.0)
+param 3:  Lookahead (ms)
+param 4:  Release (ms or auto)
+param 5:  True Peak (on/off)
+
+## GLUE COMPRESSOR
+param 0:  Device On
+param 1:  Threshold
+param 2:  Ratio (2, 4, 8, 10, 20, 100)
+param 3:  Attack (0.1–30ms)
+param 4:  Release (0.1–1.2s or auto)
+param 5:  Makeup Gain
+param 6:  Soft Clip (on/off)
+param 7:  Peak Clip In (on/off)
+
+## IMPORTANT: Always call /track/devices then /device/parameters BEFORE setting params.
+This gives you the live parameter list with exact indices for this session.
+When asked to add a device AND set params, the action sequence must be:
+1. POST /device/add
+2. GET /track/devices (to find the new device index)
+3. GET /device/parameters (to find param indices)
+4. POST /device/parameter/set (for each param to set)
+Since this is multi-step, describe the plan in "message" and execute step 1.
+Tell the user to ask "now set the EQ parameters" for step 2 onwards.
+
+## RESPONSE FORMAT — JSON ONLY, no text outside it:
+{
+  "message": "friendly explanation of what you're doing and why",
+  "tips": "EQ, compression, sidechain, mastering advice for manual application (empty string if none)",
+  "actions": [
+    { "endpoint": "/track/volume", "method": "POST", "body": {"track":0,"volume":0.65}, "label": "Kick → −4.7dB" }
+  ]
+}
+
+Always include "label" on each action. Apply ALL relevant tracks on full-pass requests.`
+}
+
+// ════════════════════════════════════════
+// CHAT
+// ════════════════════════════════════════
+function addBubble(role, html) {
+  const chat = document.getElementById('chat')
+  const d = document.createElement('div')
+  d.className = `msg ${role}`
+  d.innerHTML = `
+    <div class="av ${role==='user'?'usr':'ai'}">${role==='user'?'YOU':'AI'}</div>
+    <div class="bubble">${html}</div>`
+  chat.appendChild(d)
+  chat.scrollTop = chat.scrollHeight
+}
+
+function showTyping() {
+  const chat = document.getElementById('chat')
+  const d = document.createElement('div')
+  d.id = 'typing'; d.className = 'msg ai typing-msg'
+  d.innerHTML = `<div class="av ai">AI</div><div class="dots"><span></span><span></span><span></span></div>`
+  chat.appendChild(d)
+  chat.scrollTop = chat.scrollHeight
+}
+
+function removeTyping() { document.getElementById('typing')?.remove() }
+
+function renderActionCards(actions, results) {
+  if (!actions?.length) return ''
+  const cards = actions.map((a, i) => {
+    const r   = results?.[i]
+    const ok  = r?.ok !== false
+    const cls = !bridgeAlive ? 'warn' : ok ? '' : 'err'
+    const ico = !bridgeAlive ? '⚠' : ok ? '✓' : '✗'
+    const detail = r?.osc || r?.error || (!bridgeAlive ? 'bridge offline' : '')
+    return `<div class="acard ${cls}">
+      <span>${ico}</span>
+      <span class="lbl">${a.label||a.endpoint}</span>
+      <span class="osc">${detail}</span>
+    </div>`
+  }).join('')
+  return `<div class="agroup">${cards}</div>`
+}
+
+async function sendMsg(text) {
+  const input   = document.getElementById('chatInput')
+  const userMsg = text || input.value.trim()
+  if (!userMsg) return
+
+  input.value = ''; input.style.height = 'auto'
+  document.getElementById('sendBtn').disabled = true
+
+  addBubble('user', userMsg)
+  chatHistory.push({ role: 'user', content: userMsg })
+  showTyping()
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':    'application/json',
+        'x-api-key':       session.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        system:     buildSystem(),
+        messages:   chatHistory,
+      }),
+    })
+
+    const data = await res.json()
+    const raw  = data.content?.[0]?.text || '{"message":"No response.","actions":[],"tips":""}'
+    chatHistory.push({ role: 'assistant', content: raw })
+
+    let parsed
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()) }
+    catch { parsed = { message: raw, actions:[], tips:'' } }
+
+    removeTyping()
+
+    // Execute actions via Electron IPC → bridge
+    let results = []
+    if (parsed.actions?.length) {
+      results = await Promise.all(
+        parsed.actions.map(a => window.mixmind.bridgeCall(a.endpoint, a.method||'POST', a.body||{}))
+      )
+    }
+
+    const cards = renderActionCards(parsed.actions, results)
+    const tip   = parsed.tips
+      ? `<div class="tip-block"><strong>💡 Manual tips:</strong><br>${parsed.tips}</div>`
+      : ''
+
+    addBubble('ai', `${parsed.message}${cards}${tip}`)
+
+  } catch (e) {
+    removeTyping()
+    addBubble('ai', `<span style="color:var(--error)">Error: ${e.message}</span>`)
+  }
+
+  document.getElementById('sendBtn').disabled = false
+  document.getElementById('chatInput').focus()
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+;(async () => {
+  // Restore saved API key
+  const saved = await window.mixmind.store.get('apiKey')
+  if (saved) document.getElementById('apiKey').value = saved
+
+  // Show version
+  try {
+    const v = await window.mixmind.getVersion()
+    const vl = document.getElementById('versionLabel')
+    if (vl) vl.textContent = `v${v}`
+  } catch {}
+
+  // Listen for update notifications
+  try {
+    window.mixmind.onUpdateStatus(({ status, version, message }) => {
+      const banner = document.getElementById('updateBanner')
+      const msg    = document.getElementById('updateMsg')
+      if (!banner || !msg) return
+      msg.textContent = message
+      banner.style.display = 'flex'
+      if (status !== 'ready') {
+        // Hide restart button while downloading
+        banner.querySelector('button').style.display = 'none'
+      } else {
+        banner.querySelector('button').style.display = 'inline-block'
+      }
+    })
+  } catch {}
+
+  autoFill()
+})()
+</script>
+</body>
+</html>
