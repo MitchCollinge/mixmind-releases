@@ -4,608 +4,514 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://api.anthropic.com; img-src 'self' data:;" />
+  content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://api.anthropic.com; connect-src 'self' http://127.0.0.1:5005 http://localhost:5005 https://api.anthropic.com; img-src 'self' data:;" />
 <title>MixMind</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
 :root {
-  --bg:      #080808;
-  --s1:      #0f0f0f;
-  --s2:      #161616;
-  --border:  #1e1e1e;
-  --border2: #2a2a2a;
-  --accent:  #ff6b35;
-  --a2:      #ffd166;
-  --green:   #06d6a0;
-  --blue:    #118ab2;
-  --text:    #f0ece4;
-  --muted:   #555;
-  --muted2:  #888;
-  --error:   #ef476f;
-  --r: 5px;
+  --bg:       #080808;
+  --s1:       #0e0e0e;
+  --s2:       #141414;
+  --s3:       #1a1a1a;
+  --border:   #1f1f1f;
+  --border2:  #282828;
+  --text:     #ede8e0;
+  --muted:    #444;
+  --muted2:   #777;
+
+  /* Mode colours */
+  --mix:      #ff6b35;   /* orange  — mixing   */
+  --prod:     #38d9a9;   /* teal    — production */
+  --master:   #cc5de8;   /* purple  — mastering */
+
+  --active:   var(--mix);
+  --r: 4px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  height: 100%;
-  overflow: hidden;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
+  height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
 
-/* ── TITLEBAR (macOS hidden inset) ── */
-.titlebar {
-  height: 28px;
-  -webkit-app-region: drag;
-  background: var(--bg);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  padding-left: 80px; /* space for traffic lights */
-  border-bottom: 1px solid var(--border);
-}
-
-.titlebar-label {
-  font-size: 11px;
-  font-family: 'Inconsolata', monospace;
-  color: var(--muted);
-  letter-spacing: 0.2em;
-  font-weight: 600;
-}
-
-/* ── SCREENS ── */
-.screen { display: none; height: calc(100vh - 28px); flex-direction: column; overflow: hidden; }
+/* ═══════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════ */
+.screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
 .screen.active { display: flex; }
 
-/* ══════════════════════════════════════
-   SETUP SCREEN
-══════════════════════════════════════ */
-#setup { overflow-y: auto; }
-
-.setup-inner {
-  padding: 32px 36px 48px;
-  max-width: 860px;
+/* ═══════════════════════════════════════════
+   TITLEBAR
+═══════════════════════════════════════════ */
+.titlebar {
+  height: 30px;
+  -webkit-app-region: drag;
+  background: var(--bg);
+  display: flex; align-items: center;
+  padding-left: 80px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.wordmark {
+.titlebar-wordmark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.15em;
+  color: var(--active);
+  transition: color 0.3s;
+}
+
+#versionBadge {
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.35em;
-  color: var(--accent);
-  font-family: 'Inconsolata', monospace;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: var(--muted);
+  margin-left: 8px;
 }
 
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--muted);
-  transition: background 0.3s, box-shadow 0.3s;
+#updateBanner {
+  display: none; margin-left: auto; margin-right: 14px;
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  color: var(--prod); align-items: center; gap: 8px;
 }
 
-.live-dot.ok  { background: var(--green); box-shadow: 0 0 8px var(--green); }
-.live-dot.err { background: var(--error); }
-.live-dot.spin { animation: blink 1s ease-in-out infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-.setup-title {
-  font-size: 38px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-top: 14px;
+#updateBanner button {
+  background: var(--prod); border: none; color: #000;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  cursor: pointer; font-weight: 600;
 }
 
-.setup-title em { color: var(--accent); font-style: normal; }
+/* ═══════════════════════════════════════════
+   SETUP SCREEN
+═══════════════════════════════════════════ */
+#setup { background: var(--bg); overflow-y: auto; }
+
+.setup-body { padding: 28px 36px 48px; max-width: 900px; }
+
+.setup-hero {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 28px;
+}
+
+.setup-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px; line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.setup-headline .mix-c   { color: var(--mix); }
+.setup-headline .prod-c  { color: var(--prod); }
+.setup-headline .mast-c  { color: var(--master); }
 
 .setup-sub {
+  color: var(--muted2); font-size: 13px;
+  line-height: 1.6; margin-top: 8px; max-width: 380px;
+}
+
+.bridge-pill {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
   color: var(--muted2);
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.6;
-  font-weight: 400;
+  background: var(--s1); border: 1px solid var(--border2);
+  padding: 7px 14px; border-radius: 20px;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
 }
 
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 24px 0;
-}
+.bridge-pill:hover { border-color: var(--active); color: var(--active); }
+.bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
+.bridge-dot.ok    { background: var(--prod); box-shadow: 0 0 8px var(--prod); }
+.bridge-dot.err   { background: #f03e3e; }
+.bridge-dot.pulse { animation: bdot 1.5s ease-in-out infinite; }
+@keyframes bdot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-/* ── Field rows ── */
+/* Dividers */
+.sdiv { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* Section label */
+.slbl {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  font-weight: 500; letter-spacing: 0.2em; color: var(--muted);
+  text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.slbl::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* Config fields */
 .field-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
-
-.flabel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-  font-family: 'Inconsolata', monospace;
-  text-transform: uppercase;
+.field { display: flex; flex-direction: column; gap: 5px; }
+.flbl {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase;
 }
 
 input[type="password"], input[type="text"], select {
-  background: var(--s1);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 9px 13px;
-  border-radius: var(--r);
-  font-family: 'Inconsolata', monospace;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
-  -webkit-user-select: text;
-  user-select: text;
+  background: var(--s1); border: 1px solid var(--border2);
+  color: var(--text); padding: 8px 12px; border-radius: var(--r);
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  outline: none; transition: border-color 0.15s;
+  -webkit-user-select: text; user-select: text;
 }
+input:focus, select:focus { border-color: var(--active); }
+input[type="password"] { width: 270px; }
 
-input:focus, select:focus { border-color: var(--accent); }
-input[type="password"] { width: 280px; }
-.url-input { width: 170px; }
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--muted2);
-  padding: 9px 16px;
-  border-radius: var(--r);
-  font-size: 12px;
-  font-family: 'Inconsolata', monospace;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  height: 38px;
-}
-
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ── Section label ── */
-.slabel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.25em;
-  color: var(--muted);
-  font-family: 'Inconsolata', monospace;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.slabel::after { content:''; flex:1; height:1px; background: var(--border); }
-
-/* ── Track cards ── */
+/* Track grid */
 .tracks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 8px; margin-bottom: 12px;
 }
 
 .tcard {
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 13px;
-  position: relative;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px; position: relative;
   transition: border-color 0.15s;
 }
 
 .tcard:hover { border-color: var(--border2); }
 
-.tcard-num {
-  font-size: 10px;
-  color: var(--muted);
-  font-family: 'Inconsolata', monospace;
-  margin-bottom: 7px;
+.tcard-idx {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--muted); margin-bottom: 6px; letter-spacing: 0.1em;
 }
 
 .tcard-name {
-  background: transparent;
-  border: none;
+  background: transparent; border: none;
   border-bottom: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 2px 0 6px;
-  outline: none;
-  width: 100%;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 2px 0 5px; outline: none; width: 100%;
   transition: border-color 0.15s;
-  -webkit-user-select: text;
-  user-select: text;
+  -webkit-user-select: text; user-select: text;
 }
-
-.tcard-name:focus { border-color: var(--accent); }
+.tcard-name:focus { border-color: var(--active); }
 .tcard-name::placeholder { color: var(--muted); font-weight: 400; }
 
 .tcard-type {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 5px 8px;
-  border-radius: var(--r);
-  font-size: 12px;
-  font-family: 'Inconsolata', monospace;
-  outline: none;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 8px;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 8px; border-radius: var(--r);
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  outline: none; cursor: pointer; width: 100%; margin-top: 7px;
 }
 
-.tcard-remove {
-  position: absolute;
-  top: 9px; right: 9px;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  transition: color 0.15s;
+.tcard-rm {
+  position: absolute; top: 8px; right: 8px;
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 12px; transition: color 0.15s;
 }
+.tcard-rm:hover { color: #f03e3e; }
 
-.tcard-remove:hover { color: var(--error); }
+/* Track actions */
+.track-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.track-btns { display: flex; gap: 10px; }
+.btn-ghost {
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--muted2); padding: 7px 14px; border-radius: var(--r);
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--active); color: var(--active); }
+.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── Session meta ── */
+/* Meta selects */
 .meta-row { display: flex; gap: 14px; flex-wrap: wrap; }
 
-/* ── Start ── */
+/* Start */
 .start-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 28px;
+  display: flex; align-items: center; gap: 20px; margin-top: 28px;
 }
 
-.btn-primary {
-  background: var(--accent);
-  border: none;
-  color: #fff;
-  padding: 13px 36px;
-  border-radius: var(--r);
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  letter-spacing: 0.02em;
+.btn-start {
+  background: var(--active); border: none; color: #fff;
+  padding: 13px 36px; border-radius: var(--r);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em;
 }
+.btn-start:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-.btn-primary:hover { background: #ff825a; transform: translateY(-1px); }
+/* ═══════════════════════════════════════════
+   MAIN APP SCREEN
+═══════════════════════════════════════════ */
+#app { background: var(--bg); }
 
-.bridge-note {
-  font-size: 12px;
-  color: var(--muted2);
-  font-family: 'Inconsolata', monospace;
-  line-height: 1.5;
-}
-
-.bridge-note a {
-  color: var(--accent);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-/* ══════════════════════════════════════
-   MIX SCREEN
-══════════════════════════════════════ */
-#mixer { background: var(--bg); }
-
-.mix-header {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0 16px;
-  height: 46px;
+/* ── App header ── */
+.app-header {
+  display: flex; align-items: stretch;
   border-bottom: 1px solid var(--border);
-  background: var(--s1);
-  flex-shrink: 0;
-  gap: 12px;
+  flex-shrink: 0; background: var(--s1); height: 48px;
 }
 
-.mix-wordmark {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  white-space: nowrap;
-  font-family: 'Inconsolata', monospace;
+.app-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; letter-spacing: 0.12em;
+  color: var(--active); display: flex; align-items: center;
+  padding: 0 20px; border-right: 1px solid var(--border);
+  transition: color 0.3s; white-space: nowrap;
 }
 
-.track-pills {
-  flex: 1;
-  display: flex;
-  gap: 5px;
-  overflow-x: auto;
+/* Mode tabs */
+.mode-tabs {
+  display: flex; flex: 0 0 auto;
+  border-right: 1px solid var(--border);
+}
+
+.mode-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 20px; cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  font-weight: 500; letter-spacing: 0.08em;
+  color: var(--muted2); border-bottom: 2px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+  background: none; border-top: none; border-left: none; border-right: none;
+}
+
+.mode-tab .tab-icon { font-size: 14px; }
+.mode-tab:hover { color: var(--text); }
+
+.mode-tab.active-mix    { color: var(--mix);    border-bottom-color: var(--mix);    }
+.mode-tab.active-prod   { color: var(--prod);   border-bottom-color: var(--prod);   }
+.mode-tab.active-master { color: var(--master); border-bottom-color: var(--master); }
+
+/* Track pills */
+.track-pills-bar {
+  flex: 1; display: flex; align-items: center;
+  gap: 5px; overflow-x: auto; padding: 0 14px;
   scrollbar-width: none;
-  padding: 0 4px;
 }
-
-.track-pills::-webkit-scrollbar { display: none; }
+.track-pills-bar::-webkit-scrollbar { display: none; }
 
 .tpill {
-  font-size: 10px;
-  padding: 3px 9px;
-  border-radius: 20px;
-  border: 1px solid var(--border2);
-  font-family: 'Inconsolata', monospace;
-  color: var(--muted2);
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-size: 10px; padding: 3px 9px; border-radius: 20px;
+  border: 1px solid var(--border2); font-family: 'DM Mono', monospace;
+  color: var(--muted2); white-space: nowrap; flex-shrink: 0;
 }
-
-/* type colours */
-.tpill[data-t="kick"]   { border-color:#ff6b3566;color:#ff6b35; }
-.tpill[data-t="bass"]   { border-color:#118ab266;color:#118ab2; }
-.tpill[data-t="sub"]    { border-color:#0077b666;color:#0077b6; }
-.tpill[data-t="snare"]  { border-color:#ffd16666;color:#ffd166; }
-.tpill[data-t="hihat"]  { border-color:#06d6a066;color:#06d6a0; }
-.tpill[data-t="clap"]   { border-color:#ffd16666;color:#ffd166; }
-.tpill[data-t="lead"]   { border-color:#c77dff66;color:#c77dff; }
-.tpill[data-t="pad"]    { border-color:#48cae466;color:#48cae4; }
-.tpill[data-t="vocals"] { border-color:#f7258566;color:#f72585; }
-.tpill[data-t="guitar"] { border-color:#fb850066;color:#fb8500; }
-.tpill[data-t="keys"]   { border-color:#b5e48c66;color:#b5e48c; }
-.tpill[data-t="master"] { border-color:#ffffff33;color:#ffffffaa; }
+.tpill[data-t="kick"]   { border-color:#ff6b3555;color:#ff6b35; }
+.tpill[data-t="bass"]   { border-color:#339af055;color:#339af0; }
+.tpill[data-t="snare"]  { border-color:#ffd43b55;color:#ffd43b; }
+.tpill[data-t="hihat"]  { border-color:#38d9a955;color:#38d9a9; }
+.tpill[data-t="lead"]   { border-color:#cc5de855;color:#cc5de8; }
+.tpill[data-t="pad"]    { border-color:#74c0fc55;color:#74c0fc; }
+.tpill[data-t="vocals"] { border-color:#f7828255;color:#f78282; }
+.tpill[data-t="bass"]   { border-color:#339af055;color:#339af0; }
+.tpill[data-t="master"] { border-color:#ffffff22;color:#ffffffaa; }
+.tpill[data-t="fx"]     { border-color:#adb5bd55;color:#adb5bd; }
 
 .header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; flex-shrink: 0;
 }
 
-.status-badge {
-  font-size: 11px;
-  font-family: 'Inconsolata', monospace;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted2);
+.status-dot-wrap {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2);
 }
 
-.btn-back {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--muted2);
-  padding: 4px 12px;
-  border-radius: var(--r);
-  font-size: 11px;
-  font-family: 'Inconsolata', monospace;
-  cursor: pointer;
-  transition: all 0.15s;
+.btn-settings {
+  background: none; border: 1px solid var(--border2); color: var(--muted2);
+  padding: 4px 11px; border-radius: var(--r);
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  cursor: pointer; transition: all 0.15s;
 }
+.btn-settings:hover { border-color: var(--active); color: var(--active); }
 
-.btn-back:hover { border-color: var(--accent); color: var(--accent); }
-
-/* quick chips */
+/* ── Quick bar ── */
 .quick-bar {
-  display: flex;
-  gap: 6px;
-  padding: 8px 14px;
+  display: flex; gap: 6px; padding: 8px 14px;
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+  background: var(--bg);
 }
-
 .quick-bar::-webkit-scrollbar { display: none; }
 
 .qchip {
-  font-size: 11px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border2);
-  background: var(--s1);
-  color: var(--muted2);
-  cursor: pointer;
-  font-family: 'Inconsolata', monospace;
-  transition: all 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-size: 11px; padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--border2); background: var(--s1);
+  color: var(--muted2); cursor: pointer;
+  font-family: 'DM Mono', monospace; transition: all 0.15s;
+  white-space: nowrap; flex-shrink: 0;
 }
+.qchip:hover { background: var(--s2); }
+.qchip.mix-chip:hover    { border-color: var(--mix);    color: var(--mix);    }
+.qchip.prod-chip:hover   { border-color: var(--prod);   color: var(--prod);   }
+.qchip.master-chip:hover { border-color: var(--master); color: var(--master); }
 
-.qchip:hover { border-color: var(--a2); color: var(--a2); background: var(--s2); }
+/* ── Mode panels ── */
+.mode-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.mode-panel.active { display: flex; }
 
-/* chat */
+/* ── Chat ── */
 .chat {
-  flex: 1;
-  overflow-y: auto;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  flex: 1; overflow-y: auto; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
 }
 
-.msg { display: flex; gap: 10px; max-width: 820px; }
+.msg { display: flex; gap: 9px; max-width: 860px; }
 .msg.user { align-self: flex-end; flex-direction: row-reverse; }
 
 .av {
-  width: 26px; height: 26px;
-  border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 800;
-  font-family: 'Inconsolata', monospace;
-  flex-shrink: 0; margin-top: 2px;
+  font-size: 9px; font-weight: 700;
+  font-family: 'DM Mono', monospace; flex-shrink: 0; margin-top: 2px;
 }
-
-.av.ai  { background: var(--accent); color: #fff; }
-.av.usr { background: var(--s2); color: var(--a2); border: 1px solid var(--a2); }
+.av.ai-mix    { background: var(--mix);    color: #fff; }
+.av.ai-prod   { background: var(--prod);   color: #000; }
+.av.ai-master { background: var(--master); color: #fff; }
+.av.usr { background: var(--s3); color: var(--muted2); border: 1px solid var(--border2); }
 
 .bubble {
-  padding: 10px 14px;
-  border-radius: var(--r);
-  line-height: 1.65;
-  font-size: 13px;
-  max-width: 640px;
-  -webkit-user-select: text;
-  user-select: text;
+  padding: 9px 13px; border-radius: var(--r);
+  line-height: 1.65; font-size: 13px; max-width: 660px;
+  -webkit-user-select: text; user-select: text;
 }
-
 .msg.ai   .bubble { background: var(--s1); border: 1px solid var(--border); }
 .msg.user .bubble { background: var(--s2); border: 1px solid var(--border2); }
 
-.agroup { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+/* Action cards */
+.agroup { margin-top: 9px; display: flex; flex-direction: column; gap: 4px; }
 
 .acard {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 9px;
   padding: 6px 11px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--green);
+  background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--r);
-  font-family: 'Inconsolata', monospace;
-  font-size: 11px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
 }
-
-.acard.err  { border-left-color: var(--error); }
-.acard.warn { border-left-color: var(--a2); }
+.acard.ok  { border-left: 3px solid var(--prod); }
+.acard.err { border-left: 3px solid #f03e3e; }
+.acard.warn{ border-left: 3px solid #ffd43b; }
 .acard .lbl { flex: 1; color: var(--text); }
-.acard .osc { color: var(--muted); font-size: 10px; }
+.acard .det { color: var(--muted); font-size: 10px; }
 
-.tip-block {
-  margin-top: 10px;
-  padding: 10px 13px;
-  background: #0a1a12;
-  border: 1px solid #1a3a28;
-  border-radius: var(--r);
-  font-size: 12px;
-  color: #7dcfb6;
-  line-height: 1.65;
-}
+/* Tips */
+.tip-mix    { margin-top:9px; padding:10px 13px; background:#0f0a07; border:1px solid #2a1a0f; border-radius:var(--r); font-size:12px; color:#d4956b; line-height:1.65; }
+.tip-prod   { margin-top:9px; padding:10px 13px; background:#071410; border:1px solid #0f2a22; border-radius:var(--r); font-size:12px; color:#6bcfb4; line-height:1.65; }
+.tip-master { margin-top:9px; padding:10px 13px; background:#0e0812; border:1px solid #1f0f2a; border-radius:var(--r); font-size:12px; color:#c48de0; line-height:1.65; }
+.tip-mix strong, .tip-prod strong, .tip-master strong { font-weight: 600; }
 
-.tip-block strong { color: var(--green); }
-
-.typing-msg { display: flex; gap: 10px; }
-
+/* Typing */
+.typing-msg { display: flex; gap: 9px; }
 .dots {
   display: flex; gap: 4px; align-items: center;
-  padding: 11px 14px;
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
+  padding: 10px 14px; background: var(--s1);
+  border: 1px solid var(--border); border-radius: var(--r);
 }
-
 .dots span {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--muted);
-  animation: d 1.2s ease-in-out infinite;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted); animation: td 1.2s ease-in-out infinite;
 }
+.dots span:nth-child(2){ animation-delay:.2s; }
+.dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes td { 0%,80%,100%{transform:translateY(0);opacity:.3} 40%{transform:translateY(-5px);opacity:1} }
 
-.dots span:nth-child(2) { animation-delay: .2s; }
-.dots span:nth-child(3) { animation-delay: .4s; }
-
-@keyframes d {
-  0%,80%,100% { transform:translateY(0); opacity:.3; }
-  40%          { transform:translateY(-5px); opacity:1; }
-}
-
-/* input row */
+/* ── Input row ── */
 .input-row {
-  padding: 12px 14px;
-  border-top: 1px solid var(--border);
-  display: flex; gap: 10px; align-items: flex-end;
-  background: var(--s1);
-  flex-shrink: 0;
+  padding: 12px 14px; border-top: 1px solid var(--border);
+  display: flex; gap: 9px; align-items: flex-end;
+  background: var(--s1); flex-shrink: 0;
 }
 
 textarea {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 9px 13px;
-  border-radius: var(--r);
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  resize: none;
-  outline: none;
-  line-height: 1.5;
-  max-height: 110px;
-  overflow-y: auto;
-  transition: border-color .15s;
-  -webkit-user-select: text;
-  user-select: text;
+  flex: 1; background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text); padding: 9px 13px; border-radius: var(--r);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  resize: none; outline: none; line-height: 1.5;
+  max-height: 110px; overflow-y: auto;
+  transition: border-color 0.15s;
+  -webkit-user-select: text; user-select: text;
 }
-
-textarea:focus { border-color: var(--accent); }
+textarea:focus { border-color: var(--active); }
 textarea::placeholder { color: var(--muted); }
 
 .send-btn {
-  background: var(--accent);
-  border: none; color: #fff;
-  padding: 9px 20px;
-  border-radius: var(--r);
-  font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 700;
-  cursor: pointer; height: 40px;
-  transition: all .15s; white-space: nowrap;
+  background: var(--active); border: none; color: #fff;
+  padding: 9px 20px; border-radius: var(--r);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; height: 40px; transition: all 0.15s; white-space: nowrap;
 }
+.send-btn:hover { filter: brightness(1.1); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.send-btn:hover    { background: #ff825a; }
-.send-btn:disabled { opacity: .4; cursor: not-allowed; }
+/* ── Production extras ── */
+.prod-note {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-bottom: 1px solid var(--border);
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+  background: var(--bg); flex-shrink: 0;
+}
+.prod-note span { color: var(--prod); }
+
+/* ── Mastering meter ── */
+.master-bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  background: var(--bg); flex-shrink: 0;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+}
+.meter-label { color: var(--muted); font-size: 10px; }
+.meter-val   { color: var(--master); font-weight: 500; }
+.meter-divider { width: 1px; height: 16px; background: var(--border); }
 </style>
 </head>
 <body>
 
-<!-- macOS traffic-light space -->
-<div class="titlebar">
-  <span class="titlebar-label">MIXMIND</span>
-  <span id="versionLabel" style="font-size:10px;font-family:Inconsolata,monospace;color:var(--muted);margin-left:8px"></span>
-  <div id="updateBanner" style="display:none;margin-left:auto;margin-right:12px;font-size:11px;font-family:Inconsolata,monospace;color:var(--accent2);display:none;align-items:center;gap:8px">
+<!-- Titlebar -->
+<div class="titlebar" id="titlebar">
+  <span class="titlebar-wordmark" id="titleWordmark">MIXMIND</span>
+  <span id="versionBadge"></span>
+  <div id="updateBanner">
     <span id="updateMsg"></span>
-    <button onclick="window.mixmind.installUpdate()" style="background:var(--accent2);border:none;color:#000;padding:2px 8px;border-radius:3px;font-size:10px;font-family:Inconsolata,monospace;cursor:pointer;font-weight:700">RESTART</button>
+    <button onclick="window.mixmind?.installUpdate()">RESTART</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ═══════════════════════════════════════════
      SETUP SCREEN
-══════════════════════════════════════ -->
+═══════════════════════════════════════════ -->
 <div class="screen active" id="setup">
-<div class="setup-inner">
+<div class="setup-body">
 
-  <div class="wordmark">
-    <div class="live-dot spin" id="setupDot"></div>
-    MixMind
-    <span id="setupBridgeText" style="color:var(--muted);font-weight:400">starting bridge…</span>
+  <div class="setup-hero">
+    <div>
+      <div class="setup-headline">
+        <span class="mix-c">MIX.</span>
+        <span class="prod-c">PRODUCE.</span>
+        <span class="mast-c">MASTER.</span>
+      </div>
+      <div class="setup-sub">The first AI assistant that covers your entire Ableton workflow — mixing, production, and mastering in one native app.</div>
+    </div>
+    <div class="bridge-pill" onclick="pingBridge()" id="bridgePill">
+      <div class="bridge-dot pulse" id="setupDot"></div>
+      <span id="setupBridgeText">connecting…</span>
+    </div>
   </div>
 
-  <div class="setup-title">Label your tracks.<br><em>Let AI mix them.</em></div>
-  <div class="setup-sub">Tell MixMind what each track is — it applies professional<br>gain staging, EQ guidance, panning rules, and mastering targets automatically.</div>
-
-  <div class="divider"></div>
+  <div class="sdiv"></div>
 
   <!-- API Key -->
-  <div class="slabel">Configuration</div>
+  <div class="slbl">Configuration</div>
   <div class="field-row" style="margin-bottom:20px">
     <div class="field">
-      <div class="flabel">Anthropic API Key</div>
+      <div class="flbl">Anthropic API Key</div>
       <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" />
     </div>
   </div>
 
   <!-- Session meta -->
-  <div class="slabel">Session</div>
-  <div class="meta-row" style="margin-bottom:24px">
+  <div class="slbl">Session</div>
+  <div class="meta-row" style="margin-bottom:22px">
     <div class="field">
-      <div class="flabel">Genre</div>
+      <div class="flbl">Genre</div>
       <select id="genre">
         <option>Electronic / Dance</option>
         <option>Hip-Hop / Trap</option>
@@ -614,85 +520,159 @@ textarea::placeholder { color: var(--muted); }
         <option>Ambient / Experimental</option>
         <option>R&B / Soul</option>
         <option>Film / Cinematic</option>
+        <option>Techno / Industrial</option>
+        <option>House</option>
+        <option>Drum & Bass</option>
       </select>
     </div>
     <div class="field">
-      <div class="flabel">Mastering Target</div>
+      <div class="flbl">Mastering Target</div>
       <select id="masterTarget">
         <option value="streaming">Streaming (−14 LUFS)</option>
         <option value="club">Club / DJ (−9 LUFS)</option>
         <option value="cd">CD (−10 LUFS)</option>
         <option value="film">Film (−24 LUFS)</option>
+        <option value="youtube">YouTube (−14 LUFS)</option>
       </select>
     </div>
     <div class="field">
-      <div class="flabel">Mix Style</div>
+      <div class="flbl">Mix Style</div>
       <select id="mixStyle">
         <option value="balanced">Balanced & Natural</option>
         <option value="punchy">Punchy & Upfront</option>
         <option value="wide">Wide & Spacious</option>
         <option value="vintage">Warm & Vintage</option>
+        <option value="loud">Loud & Modern</option>
       </select>
+    </div>
+    <div class="field">
+      <div class="flbl">Key / Scale</div>
+      <input type="text" id="musicalKey" placeholder="e.g. C minor, F# major" style="width:160px" />
+    </div>
+    <div class="field">
+      <div class="flbl">BPM</div>
+      <input type="text" id="bpm" placeholder="130" style="width:80px" />
     </div>
   </div>
 
   <!-- Tracks -->
-  <div class="slabel">Tracks</div>
+  <div class="slbl">Tracks</div>
   <div class="tracks-grid" id="tracksGrid"></div>
-  <div class="track-btns" style="margin-bottom:4px">
+  <div class="track-actions" style="margin-bottom:4px">
     <button class="btn-ghost" onclick="addTrack()">+ Add Track</button>
+    <button class="btn-ghost" id="importBtn" onclick="importFromAbleton()">⬇ Import from Ableton</button>
     <button class="btn-ghost" onclick="autoFill()">⚡ Auto-fill</button>
     <button class="btn-ghost" onclick="clearTracks()">✕ Clear</button>
   </div>
 
   <div class="start-row">
-    <button class="btn-primary" onclick="startSession()">Start Mixing →</button>
-    <div class="bridge-note" id="bridgeNote">
-      Waiting for bridge…<br>
-      <a onclick="openAbletonOSC()">↗ AbletonOSC setup guide</a>
-    </div>
+    <button class="btn-start" onclick="startSession()">Launch MixMind →</button>
   </div>
 
 </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     MIX SCREEN
-══════════════════════════════════════ -->
-<div class="screen" id="mixer">
-  <div class="mix-header">
-    <div class="mix-wordmark">MIXMIND</div>
-    <div class="track-pills" id="trackPills"></div>
+<!-- ═══════════════════════════════════════════
+     APP SCREEN
+═══════════════════════════════════════════ -->
+<div class="screen" id="app">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-logo" id="appLogo">MIXMIND</div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active-mix" id="tab-mix" onclick="setMode('mix')">
+        <span class="tab-icon">🎚</span> MIXING
+      </button>
+      <button class="mode-tab" id="tab-prod" onclick="setMode('prod')">
+        <span class="tab-icon">🎹</span> PRODUCTION
+      </button>
+      <button class="mode-tab" id="tab-master" onclick="setMode('master')">
+        <span class="tab-icon">🎛</span> MASTERING
+      </button>
+    </div>
+
+    <!-- Track pills -->
+    <div class="track-pills-bar" id="trackPills"></div>
+
     <div class="header-right">
-      <div class="status-badge">
-        <div class="live-dot" id="mixDot"></div>
-        <span id="mixStatus">–</span>
+      <div class="status-dot-wrap">
+        <div class="bridge-dot" id="appDot"></div>
+        <span id="appStatus">–</span>
       </div>
-      <button class="btn-back" onclick="goSetup()">← Setup</button>
+      <button class="btn-settings" onclick="goSetup()">← Setup</button>
     </div>
   </div>
 
+  <!-- Quick bar -->
   <div class="quick-bar" id="quickBar"></div>
 
-  <div class="chat" id="chat"></div>
-
-  <div class="input-row">
-    <textarea id="chatInput" rows="1"
-      placeholder="e.g. 'Gain stage everything for a club mix' or 'The kick and bass are clashing'"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
-      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-    <button class="send-btn" id="sendBtn" onclick="sendMsg()">SEND</button>
+  <!-- ── MIXING MODE ── -->
+  <div class="mode-panel active" id="panel-mix">
+    <div class="chat" id="chat-mix"></div>
+    <div class="input-row">
+      <textarea id="input-mix" rows="1"
+        placeholder="e.g. 'Gain stage everything for a club mix' or 'The kick and bass are clashing'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('mix')}"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn-mix" onclick="sendMsg('mix')">SEND</button>
+    </div>
   </div>
-</div>
+
+  <!-- ── PRODUCTION MODE ── -->
+  <div class="mode-panel" id="panel-prod">
+    <div class="prod-note">
+      <span>⚡ PRODUCTION MODE</span> — Create MIDI, load instruments, design sounds, build arrangements
+    </div>
+    <div class="chat" id="chat-prod"></div>
+    <div class="input-row">
+      <textarea id="input-prod" rows="1"
+        placeholder="e.g. 'Add Serum to track 4' or 'Create a chord progression in C minor' or 'Load a drum rack'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('prod')}"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn-prod" onclick="sendMsg('prod')" style="background:var(--prod);color:#000">SEND</button>
+    </div>
+  </div>
+
+  <!-- ── MASTERING MODE ── -->
+  <div class="mode-panel" id="panel-master">
+    <div class="master-bar">
+      <span class="meter-label">TARGET</span>
+      <span class="meter-val" id="masterTargetDisplay">−14 LUFS</span>
+      <div class="meter-divider"></div>
+      <span class="meter-label">GENRE</span>
+      <span class="meter-val" id="masterGenreDisplay">–</span>
+      <div class="meter-divider"></div>
+      <span class="meter-label">STYLE</span>
+      <span class="meter-val" id="masterStyleDisplay">–</span>
+    </div>
+    <div class="chat" id="chat-master"></div>
+    <div class="input-row">
+      <textarea id="input-master" rows="1"
+        placeholder="e.g. 'Build a mastering chain' or 'Set the limiter ceiling to -1dBTP' or 'Is my master ready for Spotify?'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('master')}"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn-master" onclick="sendMsg('master')" style="background:var(--master)">SEND</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
 
 <script>
-// ════════════════════════════════════════
+'use strict'
+
+// ════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════
-let tracks  = []
-let session = {}
-let chatHistory = []
-let bridgeAlive = false
+// ════════════════════════════════════════════
+const BRIDGE = 'http://localhost:5005'
+let tracks    = []
+let session   = {}
+let mode      = 'mix'
+let bridgeOk  = false
+let histories = { mix: [], prod: [], master: [] }
+let knowledge = {}  // loaded from /knowledge endpoint
 
 const TRACK_TYPES = [
   'kick','snare','hihat','clap','perc',
@@ -701,51 +681,64 @@ const TRACK_TYPES = [
   'fx','foley','master','other'
 ]
 
-// ════════════════════════════════════════
-// BRIDGE STATUS
-// ════════════════════════════════════════
-window.mixmind.onBridgeStatus(({ ok }) => {
-  bridgeAlive = ok
-  updateBridgeDots()
-})
+const LUFS_MAP = {
+  streaming:'−14 LUFS', club:'−9 LUFS',
+  cd:'−10 LUFS', film:'−24 LUFS', youtube:'−14 LUFS'
+}
 
-async function updateBridgeDots() {
-  const dot  = document.getElementById('setupDot')
-  const txt  = document.getElementById('setupBridgeText')
-  const mdot = document.getElementById('mixDot')
-  const mst  = document.getElementById('mixStatus')
-  const note = document.getElementById('bridgeNote')
-
-  dot.className  = 'live-dot ' + (bridgeAlive ? 'ok' : 'err')
-  mdot.className = 'live-dot ' + (bridgeAlive ? 'ok' : 'err')
-
-  if (bridgeAlive) {
-    txt.textContent = 'bridge connected ✓'
-    txt.style.color = 'var(--green)'
-    mst.textContent = 'live'
-    note.innerHTML  = `Bridge running · <a onclick="openAbletonOSC()">↗ AbletonOSC docs</a>`
-  } else {
-    txt.textContent = 'bridge offline'
-    txt.style.color = 'var(--error)'
-    mst.textContent = 'offline'
-    note.innerHTML  = `Bridge starting… · <a onclick="openAbletonOSC()">↗ AbletonOSC setup</a>`
+// ════════════════════════════════════════════
+// BRIDGE
+// ════════════════════════════════════════════
+async function bridgeCall(endpoint, method='POST', body={}) {
+  try {
+    let url = `${BRIDGE}${endpoint}`
+    if (method === 'GET' && Object.keys(body).length)
+      url += '?' + new URLSearchParams(body).toString()
+    const r = await fetch(url, {
+      method,
+      headers: method !== 'GET' ? {'Content-Type':'application/json'} : {},
+      body: method !== 'GET' ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(5000),
+    })
+    return await r.json()
+  } catch (e) {
+    return { ok: false, error: e.message }
   }
 }
 
-// Initial check
-;(async () => {
-  const s = await window.mixmind.getBridgeStatus()
-  bridgeAlive = s.ok
-  updateBridgeDots()
-})()
-
-function openAbletonOSC() {
-  window.mixmind.openExternal('https://github.com/ideoforms/AbletonOSC')
+// Use Electron IPC if available, otherwise direct fetch
+async function callBridge(endpoint, method='POST', body={}) {
+  if (window.mixmind?.bridgeCall) {
+    return window.mixmind.bridgeCall(endpoint, method, body)
+  }
+  return bridgeCall(endpoint, method, body)
 }
 
-// ════════════════════════════════════════
+async function pingBridge() {
+  const dot1 = document.getElementById('setupDot')
+  const txt  = document.getElementById('setupBridgeText')
+  const dot2 = document.getElementById('appDot')
+  const st2  = document.getElementById('appStatus')
+
+  try {
+    const r = await callBridge('/ping', 'GET')
+    bridgeOk = r.ok === true
+  } catch {
+    bridgeOk = false
+  }
+
+  dot1.className = 'bridge-dot ' + (bridgeOk ? 'ok' : 'err')
+  txt.textContent = bridgeOk ? 'Ableton connected ✓' : 'bridge offline'
+  txt.style.color = bridgeOk ? 'var(--prod)' : '#f03e3e'
+  if (dot2) {
+    dot2.className = 'bridge-dot ' + (bridgeOk ? 'ok' : 'err')
+    if (st2) st2.textContent = bridgeOk ? 'live' : 'offline'
+  }
+}
+
+// ════════════════════════════════════════════
 // SETUP
-// ════════════════════════════════════════
+// ════════════════════════════════════════════
 function renderTracks() {
   const grid = document.getElementById('tracksGrid')
   grid.innerHTML = ''
@@ -753,9 +746,9 @@ function renderTracks() {
     const d = document.createElement('div')
     d.className = 'tcard'
     d.innerHTML = `
-      <button class="tcard-remove" onclick="removeTrack(${i})">✕</button>
-      <div class="tcard-num">TRACK ${i}</div>
-      <input class="tcard-name" placeholder="e.g. Kick, Bass, Vox"
+      <button class="tcard-rm" onclick="removeTrack(${i})">✕</button>
+      <div class="tcard-idx">TRACK ${i}</div>
+      <input class="tcard-name" placeholder="e.g. Kick, Bass Synth, Lead"
         value="${t.name}" oninput="tracks[${i}].name=this.value" />
       <select class="tcard-type" onchange="tracks[${i}].type=this.value">
         ${TRACK_TYPES.map(tp => `<option value="${tp}" ${t.type===tp?'selected':''}>${tp.charAt(0).toUpperCase()+tp.slice(1)}</option>`).join('')}
@@ -764,55 +757,105 @@ function renderTracks() {
   })
 }
 
-function addTrack()   { tracks.push({ name:'', type:'other' }); renderTracks() }
-function removeTrack(i) { tracks.splice(i,1); renderTracks() }
+function addTrack()    { tracks.push({ name:'', type:'other' }); renderTracks() }
+function removeTrack(i){ tracks.splice(i,1); renderTracks() }
 function clearTracks() { tracks = []; renderTracks() }
 
 function autoFill() {
   tracks = [
-    { name:'Kick',      type:'kick'   },
-    { name:'Snare',     type:'snare'  },
-    { name:'Hi-Hats',   type:'hihat'  },
-    { name:'Bass',      type:'bass'   },
-    { name:'Lead Synth',type:'lead'   },
-    { name:'Pad',       type:'pad'    },
-    { name:'FX',        type:'fx'     },
-    { name:'Master',    type:'master' },
+    { name:'Kick',       type:'kick'   },
+    { name:'Snare',      type:'snare'  },
+    { name:'Hi-Hats',    type:'hihat'  },
+    { name:'Bass',       type:'bass'   },
+    { name:'Lead Synth', type:'lead'   },
+    { name:'Pad',        type:'pad'    },
+    { name:'FX',         type:'fx'     },
+    { name:'Master',     type:'master' },
   ]
   renderTracks()
 }
 
+async function importFromAbleton() {
+  const btn = document.getElementById('importBtn')
+  btn.textContent = '⏳ Importing…'; btn.disabled = true
+  try {
+    const data = await callBridge('/tracks', 'GET')
+    if (!data.ok) {
+      alert('Could not reach the bridge or Ableton: ' + (data.error || 'unknown error') + '\n\nIs the app running, and is MixMind selected under Preferences → MIDI → Control Surface in Live?')
+      return
+    }
+    if (!data.tracks?.length) {
+      alert('Ableton returned no tracks (empty setlist). Add at least one track in Live, then try again.')
+      return
+    }
+    const apiKey = document.getElementById('apiKey').value.trim()
+    if (!apiKey) {
+      tracks = data.tracks.map(t => ({ name: t.name, type: 'other' }))
+      renderTracks(); return
+    }
+    // Claude guesses types
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 600,
+        system: `Guess instrument types from Ableton track names. Return ONLY a JSON array. Each item: {"name":"original","type":"one of: kick,snare,hihat,clap,perc,bass,sub,lead,pad,pluck,arp,chord,stab,vocals,sample,guitar,keys,piano,fx,foley,master,other"}. Be smart from context clues in the name.`,
+        messages: [{ role:'user', content: data.tracks.map((t,i)=>`${i}: ${t.name}`).join('\n') }]
+      })
+    })
+    const aiData = await res.json()
+    const raw = aiData.content?.[0]?.text || '[]'
+    let guessed
+    try { guessed = JSON.parse(raw.replace(/```json|```/g,'').trim()) }
+    catch { guessed = data.tracks.map(t=>({name:t.name,type:'other'})) }
+    tracks = guessed.map(t=>({ name: t.name, type: t.type||'other' }))
+    renderTracks()
+  } catch(e) { alert('Import failed: ' + e.message) }
+  finally { btn.textContent = '⬇ Import from Ableton'; btn.disabled = false }
+}
+
 async function startSession() {
   const key = document.getElementById('apiKey').value.trim()
-  if (!key)           { alert('Enter your Anthropic API key.'); return }
+  if (!key) { alert('Enter your Anthropic API key.'); return }
   if (!tracks.length) { alert('Add at least one track.'); return }
 
-  // Persist key
-  await window.mixmind.store.set('apiKey', key)
+  // Load knowledge base
+  try {
+    const kr = await callBridge('/knowledge', 'GET')
+    if (kr.ok) knowledge = kr.knowledge || {}
+  } catch {}
 
   session = {
     apiKey:       key,
     genre:        document.getElementById('genre').value,
     masterTarget: document.getElementById('masterTarget').value,
     mixStyle:     document.getElementById('mixStyle').value,
+    musicalKey:   document.getElementById('musicalKey').value || 'unknown',
+    bpm:          document.getElementById('bpm').value || 'unknown',
     tracks:       JSON.parse(JSON.stringify(tracks)),
   }
-
-  initMixer()
+  await window.mixmind?.store?.set('apiKey', key)
+  initApp()
   document.getElementById('setup').classList.remove('active')
-  document.getElementById('mixer').classList.add('active')
+  document.getElementById('app').classList.add('active')
 }
 
 function goSetup() {
-  document.getElementById('mixer').classList.remove('active')
+  document.getElementById('app').classList.remove('active')
   document.getElementById('setup').classList.add('active')
 }
 
-// ════════════════════════════════════════
-// MIXER INIT
-// ════════════════════════════════════════
-function initMixer() {
-  chatHistory = []
+// ════════════════════════════════════════════
+// APP INIT
+// ════════════════════════════════════════════
+function initApp() {
+  histories = { mix: [], prod: [], master: [] }
+  setMode('mix')
 
   // Track pills
   document.getElementById('trackPills').innerHTML =
@@ -820,367 +863,411 @@ function initMixer() {
       `<div class="tpill" data-t="${t.type}">T${i} ${t.name||t.type}</div>`
     ).join('')
 
-  // Quick chips
-  const quicks = [
-    ['🎚 Gain stage all',     'Do a full gain staging pass on all tracks, applying professional level targets for each track type and my genre.'],
-    ['🥁 Balance drums',      'Balance all the drum tracks against each other for the genre and mix style.'],
-    ['⚡ Fix low-end clash',  'The kick and bass are likely clashing. Give me gain staging and panning advice to separate them cleanly.'],
-    ['↔ Pan everything',     'Apply stereo panning rules for every track in my session.'],
-    ['🔊 Master levels',      'Set all track volumes to hit the mastering target. Walk me through your decisions.'],
-    ['📦 List devices T0',    'List all devices currently on track 0.'],
-    ['🎛 EQ Eight on kick',   'Add an EQ Eight to track 0 (kick), then tell me what parameters to set for a punchy kick in this genre.'],
-    ['🗜 Compress the drums', 'Add a Glue Compressor to the kick and snare tracks. Explain the settings you recommend.'],
-    ['🔒 Add master limiter', 'Add a Limiter to the last track (master). Set the ceiling to hit my mastering target.'],
-    ['📊 Full analysis',      'Analyse my full session and give me a complete mixing strategy with device recommendations.'],
-    ['▶ Play',                'Play the song.'],
-    ['■ Stop',                'Stop the song.'],
-  ]
+  // Mastering bar
+  document.getElementById('masterTargetDisplay').textContent = LUFS_MAP[session.masterTarget] || '−14 LUFS'
+  document.getElementById('masterGenreDisplay').textContent = session.genre.split('/')[0].trim()
+  document.getElementById('masterStyleDisplay').textContent = session.mixStyle.split('&')[0].trim()
 
-  const _qbar = document.getElementById('quickBar')
-  _qbar.innerHTML = ''
-  quicks.forEach(([l, p]) => {
-    const _btn = document.createElement('button')
-    _btn.className = 'qchip'
-    _btn.textContent = l
-    _btn.addEventListener('click', () => sendMsg(p))
-    _qbar.appendChild(_btn)
-  })
+  // Welcome messages
+  const tlist = session.tracks.map((t,i)=>`T${i}:<b>${t.name||t.type}</b>`).join(' · ')
+  addBubble('mix', 'ai', `🎚 <b>Mixing session loaded.</b> I know your tracks and I'll apply professional mixing rules to every decision.<br><br><span style="font-size:11px;font-family:DM Mono,monospace;color:var(--muted2)">${tlist}</span><br><br>Try <em>"Gain stage everything"</em> or <em>"The kick and bass are clashing — fix it."</em>`)
 
-  // Clear chat
-  const chat = document.getElementById('chat')
-  chat.innerHTML = ''
+  addBubble('prod', 'ai', `🎹 <b>Production mode ready.</b> I can help you load instruments, create MIDI patterns, design sounds, and build arrangements.<br><br>Try <em>"Add Serum to track 4"</em> or <em>"Create a chord progression in ${session.musicalKey} at ${session.bpm} BPM"</em> or <em>"Load a drum rack on track 0"</em>`)
 
-  const tgt = { streaming:'−14 LUFS', club:'−9 LUFS', cd:'−10 LUFS', film:'−24 LUFS' }
-  const trackList = session.tracks.map((t,i) => `T${i}: <strong>${t.name||t.type}</strong> (${t.type})`).join(' · ')
+  addBubble('master', 'ai', `🎛 <b>Mastering mode ready.</b> Target: <b>${LUFS_MAP[session.masterTarget]}</b> for ${session.genre}.<br><br>Try <em>"Build me a mastering chain"</em> or <em>"Add a limiter and set the ceiling to -1dBTP"</em> or <em>"Is my master ready for Spotify?"</em>`)
 
-  addBubble('ai', `Session loaded. I know your tracks and I'll apply pro mixing rules to every decision.<br><br>
-    <span style="color:var(--muted2);font-size:11px;font-family:Inconsolata,monospace;line-height:1.8">
-    ${trackList}<br>
-    Genre: ${session.genre} &nbsp;·&nbsp; Target: ${tgt[session.masterTarget]} &nbsp;·&nbsp; Style: ${session.mixStyle}
-    </span><br><br>
-    Try <em>"Gain stage everything"</em> or <em>"The kick and bass are clashing — fix it."</em>`)
+  buildQuickChips()
 }
 
-// ════════════════════════════════════════
-// SYSTEM PROMPT
-// ════════════════════════════════════════
-function buildSystem() {
-  const { tracks, genre, masterTarget, mixStyle } = session
-  const targets = {
-    streaming: '-14 LUFS / -1dBTP true peak',
-    club:      '-9 LUFS / -0.5dBTP true peak',
-    cd:        '-10 LUFS / -0.3dBTP true peak',
-    film:      '-24 LUFS / -2dBTP true peak',
+// ════════════════════════════════════════════
+// MODE SWITCHING
+// ════════════════════════════════════════════
+function setMode(m) {
+  mode = m
+  const colours = { mix: 'var(--mix)', prod: 'var(--prod)', master: 'var(--master)' }
+  document.documentElement.style.setProperty('--active', colours[m])
+  document.getElementById('titleWordmark').style.color = colours[m]
+  document.getElementById('appLogo').style.color = colours[m]
+
+  // Tabs
+  ;['mix','prod','master'].forEach(t => {
+    const tab = document.getElementById(`tab-${t}`)
+    tab.className = 'mode-tab' + (t === m ? ` active-${t}` : '')
+  })
+
+  // Panels
+  ;['mix','prod','master'].forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('active', t === m)
+  })
+
+  buildQuickChips()
+}
+
+// ════════════════════════════════════════════
+// QUICK CHIPS
+// ════════════════════════════════════════════
+function buildQuickChips() {
+  const chips = {
+    mix: [
+      ['🎚 Gain stage all',     'Do a full gain staging pass on all tracks for the genre and mix style.'],
+      ['🥁 Balance drums',      'Balance all drum tracks against each other.'],
+      ['⚡ Fix low-end clash',  'The kick and bass are clashing. Fix the levels and give me EQ advice.'],
+      ['↔ Pan everything',     'Apply professional stereo panning rules to every track.'],
+      ['📊 Full mix analysis',  'Analyse my full session and give me a comprehensive mixing strategy.'],
+      ['🔊 Master levels',      'Set all track volumes to hit the mastering target.'],
+      ['📦 List devices T0',    'List all devices currently on track 0.'],
+      ['▶ Play',               'Play the song.'],
+      ['■ Stop',               'Stop the song.'],
+    ],
+    prod: [
+      ['🎹 Chord progression',  `Create a chord progression in ${session.musicalKey||'C minor'} — give me the MIDI notes and which track to put it on.`],
+      ['🥁 Drum pattern',       `Suggest a drum pattern for ${session.genre||'electronic'} at ${session.bpm||'130'} BPM.`],
+      ['🎸 Add Serum',          'Add Serum to the lead track. Recommend initial patch settings for the genre.'],
+      ['🎛 Add Drum Rack',      'Add a Drum Rack to track 0.'],
+      ['🎺 Add instrument',     'What instrument should I add to fill out this arrangement? Recommend and load it.'],
+      ['🔊 Add bass synth',     'Add a bass instrument and suggest settings for the genre.'],
+      ['🎵 Suggest arrangement','Based on my tracks, suggest how to arrange this track — intro, drops, builds.'],
+      ['🎨 Sound design tip',   'Give me sound design tips for making this mix more interesting.'],
+    ],
+    master: [
+      ['🔗 Build Main chain', 'Build me a complete mastering chain on Ableton\'s Main channel — recommend and load each device.'],
+      ['📊 LUFS check',         `Set up the Main chain to hit ${LUFS_MAP[session.masterTarget]||'−14 LUFS'}. What limiter settings do I need?`],
+      ['🎛 Add Limiter',        'Add a Limiter to the Main channel and set the ceiling to -1dBTP.'],
+      ['🔊 Add EQ Eight',       'Add an EQ Eight to the Main channel and suggest broad mastering EQ moves.'],
+      ['🗜 Glue compression',   'Add a Glue Compressor to the Main channel with gentle mastering settings.'],
+      ['↔ Stereo width',       'Add a Utility device on Main and advise on stereo width settings.'],
+      ['✅ Ready to export?',   `Is my master ready to release for ${session.genre}? What should I check before exporting?`],
+      ['📱 Spotify check',      'What do I need to do to pass Spotify\'s loudness normalisation at -14 LUFS?'],
+    ]
   }
 
-  const trackMap = tracks.map((t,i) =>
-    `  Track ${i}: "${t.name||'(unnamed)'}" — type: ${t.type}`
-  ).join('\n')
+  const qbar = document.getElementById('quickBar')
+  qbar.innerHTML = ''
+  ;(chips[mode] || []).forEach(([label, prompt]) => {
+    const btn = document.createElement('button')
+    btn.className = `qchip ${mode}-chip`
+    btn.textContent = label
+    btn.addEventListener('click', () => sendMsg(mode, prompt))
+    qbar.appendChild(btn)
+  })
+}
 
-  return `You are MixMind, an expert audio engineer and mixing assistant controlling Ableton Live via a local OSC bridge.
+// ════════════════════════════════════════════
+// SYSTEM PROMPTS
+// ════════════════════════════════════════════
+function buildSystem(m) {
+  const { tracks, genre, masterTarget, mixStyle, musicalKey, bpm } = session
+  const trackMap = tracks.map((t,i) => `  Track ${i}: "${t.name||'(unnamed)'}" — ${t.type}`).join('\n')
+  const lufs = { streaming:'-14 LUFS/-1dBTP', club:'-9 LUFS/-0.5dBTP', cd:'-10 LUFS/-0.3dBTP', film:'-24 LUFS/-2dBTP', youtube:'-14 LUFS/-1dBTP' }
+  const target = lufs[masterTarget] || '-14 LUFS/-1dBTP'
 
+  const knowledgeStr = Object.entries(knowledge).map(([k, v]) =>
+    `## KNOWLEDGE: ${k.toUpperCase()}\n${v}`
+  ).join('\n\n')
+
+  const common = `
 ## SESSION
-Genre: ${genre}
-Mastering target: ${targets[masterTarget]}
-Mix style: ${mixStyle}
+Genre: ${genre} | Mastering target: ${target} | Mix style: ${mixStyle}
+Key: ${musicalKey} | BPM: ${bpm}
 
 ## TRACKS (0-indexed, matching Ableton)
 ${trackMap}
 
-## GAIN STAGING (Ableton volume 0.0–1.0)
-dB to linear: 0dB=0.85, -3dB=0.71, -6dB=0.60, -9dB=0.50, -12dB=0.42, -15dB=0.35, -18dB=0.28, -24dB=0.18
-Targets by type:
-- kick:   -6 to -3dB (0.60–0.71)   anchor, needs headroom
-- snare:  -9 to -6dB (0.50–0.60)   punchy, just under kick
-- hihat:  -18 to -12dB (0.28–0.42) airy, never dominant
-- clap:   -12 to -9dB (0.42–0.50)
-- perc:   -24 to -18dB (0.18–0.28) texture only
-- bass:   -9 to -6dB (0.50–0.60)   lock with kick, never louder
-- sub:    -12 to -9dB (0.42–0.50)  felt not heard
-- lead:   -6 to -3dB (0.60–0.71)   front of mix
-- pad:    -18 to -12dB (0.28–0.42) background texture
-- pluck:  -12 to -9dB (0.42–0.50)
-- arp:    -15 to -12dB (0.35–0.42)
-- chord:  -15 to -12dB (0.35–0.42)
-- stab:   -9 to -6dB (0.50–0.60)
-- vocals: -6 to -3dB (0.60–0.71)   above pads, clear
-- sample: -12 to -9dB (0.42–0.50)
-- guitar: -9 to -6dB (0.50–0.60)
-- keys:   -12 to -9dB (0.42–0.50)
-- piano:  -9 to -6dB (0.50–0.60)
-- fx:     -24 to -18dB (0.18–0.28) ear candy
-- foley:  -30 to -24dB (0.12–0.18)
-- master: NEVER touch (leave at 0.85)
-- other:  -12dB (0.42)
-
-Mix style modifiers:
-- punchy: kick/snare +1–2dB above targets
-- wide: spread elements, gentle volume compensation
-- vintage: louder mids, gentle high-frequency rolloff
-- balanced: textbook targets
-
-## PANNING (−1.0 left … 0.0 center … +1.0 right)
-Note: panning endpoint is /track/pan — include pan actions when relevant.
-- kick, bass, sub, lead, vocals, master → 0.0
-- snare, clap → 0.0 to ±0.05
-- open hihat → 0.2–0.4 right, closed hihat → −0.1 to −0.2 left
-- pads → ±0.3–0.6 (wide)
-- guitar doubles → ±0.6–1.0 hard pan
-- keys/piano → ±0.2–0.4
-- arp/pluck → ±0.2–0.35 opposite to lead
-- fx → opposite side from dominant elements
-
-## EQ / COMPRESSION ADVICE (give as tips — cannot control via OSC)
-- kick: boost 60–80Hz, cut 300–500Hz mud, boost 2–5kHz click
-- bass: boost 80–120Hz, cut 200–400Hz mud, high-pass below 40Hz
-- kick/bass clash: sidechain compress bass to kick, or dynamic EQ at 60–80Hz
-- snare: boost 200Hz body, cut 400–600Hz box, boost 4–8kHz snap
-- hihat: high-pass above 8kHz
-- lead: boost 1–3kHz presence, cut 200–400Hz buildup
-- pad: gentle low-pass at 8–12kHz, high-pass below 200–400Hz
-- vocals: high-pass below 100Hz, boost 3–5kHz, de-ess at 6–8kHz
-
-## MASTERING TARGETS
-- streaming (−14 LUFS): headroom, −1dBTP peak, dynamic range preserved
-- club (−9 LUFS): loud and punchy, maximise perceived loudness
-- cd (−10 LUFS): balanced loudness
-- film (−24 LUFS): wide dynamics, preserve transients
-
 ## BRIDGE ENDPOINTS
+Track index **track** is 0-based for arrangement tracks. In Ableton the master bus is labeled **Main**; in the API use **"track": -1** (or `"target":"main"` / `"master":true`). Prefer **"track": -1** in JSON bodies.
 
-### Transport & Tracks
-POST /play
-POST /stop
-POST /tempo           {bpm: number}
-POST /metronome       {on: 0|1}
-POST /clip/play       {track, clip}
-POST /clip/stop       {track}
-POST /track/volume    {track, volume: 0.0–1.0}
-POST /track/pan       {track, pan: −1.0 to 1.0}
-POST /track/mute      {track, mute: 0|1}
-POST /track/solo      {track, solo: 0|1}
-POST /track/arm       {track, arm: 0|1}
-POST /scene/play      {scene}
-POST /undo
-POST /redo
+POST /play | POST /stop | POST /tempo {bpm}
+POST /track/volume {track, volume:0-1} | POST /track/pan {track, pan:-1 to 1}
+POST /track/mute {track, mute} | POST /track/solo {track, solo}
+POST /track/arm {track, arm}
+GET  /tracks → arrangement tracks only (**Main** is NOT in this list)
+GET  /track ?index=-1 → **Main** channel detail | ?index=N → arrangement track
+GET  /track/devices ?track=-1 → **Main** device chain | ?track=N → arrangement track
+GET  /device/parameters ?track=-1&device=N
+POST /device/parameter/set {track, device, param, value}
+POST /device/add {track, device:"Exact Browser Name"} → native or **third-party plugin** (name as in Ableton’s browser)
+POST /clip/play {track, clip} | POST /scene/play {scene}
+POST /undo | POST /redo
+POST /app/open {} → open/focus **MixMind desktop** (needs Live running with MixMind control surface, or use `scripts/launch-mixmind-from-live.sh`)
 
-### Device Control
-GET  /track/devices            ?track=0           → lists devices on track with index+name
-GET  /device/parameters        ?track=0&device=0  → lists all params with name/value/min/max
-GET  /device/parameter/get     ?track=0&device=0&param=0
-POST /device/parameter/set     {track, device, param, value}
-POST /device/add               {track, device: "EQ Eight"}  (requires device_loader.py patch)
-POST /device/enable            {track, device, on: 0|1}
+## DEVICE LOADING — native Ableton names (examples):
+EQ Eight, Compressor, Glue Compressor, Limiter, Multiband Dynamics,
+Reverb, Hybrid Reverb, Echo, Simple Delay, Ping Pong Delay,
+Chorus-Ensemble, Flanger, Phaser-Flanger, Saturator, Redux,
+Utility, Auto Filter, Auto Pan, Beat Repeat, Drum Buss,
+Overdrive, Amp, Cabinet, Spectrum, Vinyl Distortion, Pedal,
+Drum Rack, Impulse, Simpler, Sampler, Operator, Wavetable
 
-### Supported device names for /device/add:
-EQ Eight, Compressor, Glue Compressor, Multiband Dynamics, Limiter,
-Reverb, Hybrid Reverb, Echo, Delay, Ping Pong Delay, Grain Delay,
-Chorus, Flanger, Phaser, Saturator, Redux, Vinyl Distortion,
-Dynamic Tube, Overdrive, Amp, Cabinet, Resonators, Spectrum,
-Utility, Auto Filter, Auto Pan, Beat Repeat, Looper, Drum Buss,
-Pedal, Shifter, Spectral Resonator, Spectral Blur
+## THIRD-PARTY PLUGINS (AU/VST)
+Use POST /device/add with the **exact** name shown in Ableton’s browser sidebar.
+Examples: "Serum", "Massive X", "FabFilter Pro-Q 3", "FabFilter Pro-L 2", "SSL Native Bus Compressor"
+For **mastering chain on Main**, use **"track": -1** for every load and parameter call.
+After loading, GET /track/devices?track=-1 then GET /device/parameters?track=-1&device=<index> to tune params.
 
-## EQ EIGHT PARAMETER MAP (device=0 if first device on track)
-param 0:  Device On (1=on, 0=off)
-param 1:  Band 1 Freq (Hz, 10–22000)
-param 2:  Band 1 Gain (dB, −15 to +15)
-param 3:  Band 1 Q
-param 4:  Band 1 On
-param 5:  Band 2 Freq
-param 6:  Band 2 Gain
-param 7:  Band 2 Q
-param 8:  Band 2 On
-... (pattern repeats, 4 params per band × 8 bands)
-Note: First read /device/parameters to get exact indices for the session.
-
-## COMPRESSOR PARAMETER MAP
-param 0:  Device On
-param 1:  Threshold (dB)
-param 2:  Ratio
-param 3:  Attack (ms)
-param 4:  Release (ms)
-param 5:  Gain (output, dB)
-param 6:  Knee
-param 7:  Lookahead
-Note: Always read /device/parameters first to confirm actual indices.
-
-## LIMITER PARAMETER MAP
-param 0:  Device On
-param 1:  Gain (input gain dB)
-param 2:  Ceiling (dBTP, e.g. −1.0)
-param 3:  Lookahead (ms)
-param 4:  Release (ms or auto)
-param 5:  True Peak (on/off)
-
-## GLUE COMPRESSOR
-param 0:  Device On
-param 1:  Threshold
-param 2:  Ratio (2, 4, 8, 10, 20, 100)
-param 3:  Attack (0.1–30ms)
-param 4:  Release (0.1–1.2s or auto)
-param 5:  Makeup Gain
-param 6:  Soft Clip (on/off)
-param 7:  Peak Clip In (on/off)
-
-## IMPORTANT: Always call /track/devices then /device/parameters BEFORE setting params.
-This gives you the live parameter list with exact indices for this session.
-When asked to add a device AND set params, the action sequence must be:
-1. POST /device/add
-2. GET /track/devices (to find the new device index)
-3. GET /device/parameters (to find param indices)
-4. POST /device/parameter/set (for each param to set)
-Since this is multi-step, describe the plan in "message" and execute step 1.
-Tell the user to ask "now set the EQ parameters" for step 2 onwards.
-
-## RESPONSE FORMAT — JSON ONLY, no text outside it:
+${knowledgeStr ? `## YOUR INSTALLED KNOWLEDGE BASE\n${knowledgeStr}\n\n` : ''}## RESPONSE FORMAT — JSON ONLY:
 {
-  "message": "friendly explanation of what you're doing and why",
-  "tips": "EQ, compression, sidechain, mastering advice for manual application (empty string if none)",
+  "message": "friendly explanation",
+  "tips": "advice for manual steps (empty if none)",
   "actions": [
-    { "endpoint": "/track/volume", "method": "POST", "body": {"track":0,"volume":0.65}, "label": "Kick → −4.7dB" }
+    { "endpoint": "/device/add", "method": "POST", "body": {"track":0,"device":"EQ Eight"}, "label": "Add EQ to track 0" },
+    { "endpoint": "/device/add", "method": "POST", "body": {"track":-1,"device":"Glue Compressor"}, "label": "Glue on Main" }
   ]
 }
+Emit **one action per HTTP call**. For mastering chains, list devices **in signal order** (e.g. EQ → compress → limit).`
 
-Always include "label" on each action. Apply ALL relevant tracks on full-pass requests.`
+  const systems = {
+    mix: `You are MixMind's MIXING engineer — a world-class audio engineer specialising in balance, dynamics, and tone.
+${common}
+
+## MIXING KNOWLEDGE
+### Gain Staging (Ableton 0.0–1.0 linear: 0dB=0.85, -3dB=0.71, -6dB=0.60, -9dB=0.50, -12dB=0.42, -18dB=0.28)
+- kick: 0.60–0.71 | snare: 0.50–0.60 | hihat: 0.28–0.42 | bass: 0.50–0.60
+- lead: 0.60–0.71 | pad: 0.28–0.42 | vocals: 0.60–0.71 | fx: 0.18–0.28
+- master: NEVER touch
+
+### Panning
+- kick, bass, sub, lead, vocals → center (0.0)
+- hihat: open right 0.2–0.4, closed left -0.1 to -0.2
+- pads → ±0.3–0.6 | guitars → ±0.6–1.0 | arp/pluck → ±0.2–0.35
+
+### EQ (as tips — cannot automate)
+- kick: boost 60–80Hz, cut 300–500Hz, boost 2–5kHz | bass: boost 80–120Hz, cut 200–400Hz
+- kick/bass clash: sidechain compress, or dynamic EQ at 60–80Hz
+- lead: boost 1–3kHz, cut 200–400Hz | vocals: high-pass 100Hz, boost 3–5kHz, de-ess 6–8kHz`,
+
+    prod: `You are MixMind's PRODUCTION assistant — a creative music producer and sound designer.
+${common}
+
+## PRODUCTION KNOWLEDGE
+You help with: loading instruments (native and VST/AU), sound design advice, MIDI patterns,
+arrangement suggestions, and creative direction.
+
+### Instrument loading
+Use /device/add with exact Ableton browser names. For VSTs/AUs, use their exact name as shown in the browser.
+Use **"track": -1** to load on **Main** (Ableton’s master bus).
+After loading, use /track/devices (same track index) for device index, then /device/parameters.
+
+### MIDI & arrangement
+You cannot directly write MIDI notes via the current bridge — describe the pattern clearly so the
+user can program it, or suggest using Ableton's MIDI tools. Always give specific note values (e.g. C2, G3).
+
+### Sound design by genre
+- Electronic/Dance: sub-bass 60–80Hz, sidechain compression, reverb tails, filter automation
+- Hip-Hop/Trap: 808 bass, snappy snare, hi-hat rolls, dark pads
+- House: four-on-the-floor kick, chord stabs, bassline groove, vocal chops
+- Techno: industrial textures, heavy compression, noise layers, modular-style sequences`,
+
+    master: `You are MixMind's MASTERING engineer — specialist in loudness, clarity, and release preparation.
+${common}
+
+## MASTERING KNOWLEDGE
+### Building chains in Ableton (required behaviour)
+When the user asks to **build**, **add**, or **load** a mastering chain (on **Main** or “master bus”), you MUST output **actions** that call POST /device/add **in order**, each with **"track": -1**. Example first step:
+{ "endpoint":"/device/add","method":"POST","body":{"track":-1,"device":"EQ Eight"},"label":"Master: EQ Eight" }
+Then Glue Compressor, then optional Multiband Dynamics, then Limiter — **one action per device**, in series.
+You may use **third-party** plugins the same way if the user asks (exact browser name).
+After loading, use GET /device/parameters with track:-1 and suggest **tips** for manual knob tweaks; use POST /device/parameter/set only when you know the correct param indices from a prior read (or state that indices must be confirmed in Live).
+
+### Recommended mastering chain order (load in this order):
+1. EQ Eight — subtle broad strokes (gentle high-pass, air boost, low-end cleanup)
+2. Glue Compressor — bus glue (ratio 2:1, slow attack, auto release, 1–2dB GR)
+3. Multiband Dynamics — tame harsh frequencies if needed
+4. Limiter — final ceiling
+
+### Limiter settings by target:
+- Streaming (−14 LUFS): ceiling -1.0dBTP, release auto, true peak on
+- Club (−9 LUFS): ceiling -0.5dBTP, more aggressive gain, loud master
+- CD (−10 LUFS): ceiling -0.3dBTP, balanced
+- Film (−24 LUFS): ceiling -2.0dBTP, very gentle, preserve dynamics
+
+### Pre-master checklist:
+- No clipping on any track | Kick/bass locked | Stereo width not too wide on bass
+- Mix headroom: **Main** peaks around -6 to -3dBFS before limiting
+- Check mono compatibility
+
+### Ableton Limiter params (typical indices):
+param 0: Gain (input) | param 1: Ceiling | param 2: Lookahead | param 3: Release
+Always read /device/parameters first to confirm actual indices for this session.`
+  }
+
+  return systems[m]
 }
 
-// ════════════════════════════════════════
+// ════════════════════════════════════════════
 // CHAT
-// ════════════════════════════════════════
-function addBubble(role, html) {
-  const chat = document.getElementById('chat')
+// ════════════════════════════════════════════
+function addBubble(m, role, html) {
+  const chat = document.getElementById(`chat-${m}`)
+  if (!chat) return
   const d = document.createElement('div')
-  d.className = `msg ${role}`
-  d.innerHTML = `
-    <div class="av ${role==='user'?'usr':'ai'}">${role==='user'?'YOU':'AI'}</div>
-    <div class="bubble">${html}</div>`
+  d.className = `msg ${role === 'user' ? 'user' : 'ai'}`
+  const avClass = role === 'user' ? 'usr' : `ai-${m}`
+  const avLabel = role === 'user' ? 'YOU' : m === 'mix' ? 'MX' : m === 'prod' ? 'PR' : 'MS'
+  d.innerHTML = `<div class="av ${avClass}">${avLabel}</div><div class="bubble">${html}</div>`
   chat.appendChild(d)
   chat.scrollTop = chat.scrollHeight
 }
 
-function showTyping() {
-  const chat = document.getElementById('chat')
+function showTyping(m) {
+  const chat = document.getElementById(`chat-${m}`)
+  if (!chat) return
   const d = document.createElement('div')
-  d.id = 'typing'; d.className = 'msg ai typing-msg'
-  d.innerHTML = `<div class="av ai">AI</div><div class="dots"><span></span><span></span><span></span></div>`
-  chat.appendChild(d)
-  chat.scrollTop = chat.scrollHeight
+  d.id = `typing-${m}`; d.className = 'msg ai typing-msg'
+  d.innerHTML = `<div class="av ai-${m}">${m==='mix'?'MX':m==='prod'?'PR':'MS'}</div><div class="dots"><span></span><span></span><span></span></div>`
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight
 }
 
-function removeTyping() { document.getElementById('typing')?.remove() }
+function removeTyping(m) { document.getElementById(`typing-${m}`)?.remove() }
 
-function renderActionCards(actions, results) {
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
+
+function renderCards(actions, results) {
   if (!actions?.length) return ''
-  const cards = actions.map((a, i) => {
+  return '<div class="agroup">' + actions.map((a,i) => {
     const r   = results?.[i]
     const ok  = r?.ok !== false
-    const cls = !bridgeAlive ? 'warn' : ok ? '' : 'err'
-    const ico = !bridgeAlive ? '⚠' : ok ? '✓' : '✗'
-    const detail = r?.osc || r?.error || (!bridgeAlive ? 'bridge offline' : '')
-    return `<div class="acard ${cls}">
-      <span>${ico}</span>
-      <span class="lbl">${a.label||a.endpoint}</span>
-      <span class="osc">${detail}</span>
-    </div>`
-  }).join('')
-  return `<div class="agroup">${cards}</div>`
+    const cls = !bridgeOk ? 'warn' : ok ? 'ok' : 'err'
+    const ico = !bridgeOk ? '⚠' : ok ? '✓' : '✗'
+    const det = r?.osc || r?.loaded || r?.error || (!bridgeOk ? 'bridge offline' : '')
+    return `<div class="acard ${cls}"><span>${ico}</span><span class="lbl">${a.label||a.endpoint}</span><span class="det">${det}</span></div>`
+  }).join('') + '</div>'
 }
 
-async function sendMsg(text) {
-  const input   = document.getElementById('chatInput')
-  const userMsg = text || input.value.trim()
+async function sendMsg(m, text) {
+  const input = document.getElementById(`input-${m}`)
+  const userMsg = text || input?.value?.trim()
   if (!userMsg) return
 
-  input.value = ''; input.style.height = 'auto'
-  document.getElementById('sendBtn').disabled = true
+  if (input) { input.value = ''; input.style.height = 'auto' }
+  const btn = document.getElementById(`sendBtn-${m}`)
+  if (btn) btn.disabled = true
 
-  addBubble('user', userMsg)
-  chatHistory.push({ role: 'user', content: userMsg })
-  showTyping()
+  addBubble(m, 'user', userMsg)
+  histories[m].push({ role:'user', content: userMsg })
+  showTyping(m)
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type':    'application/json',
-        'x-api-key':       session.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
+        'Content-Type':'application/json',
+        'x-api-key': session.apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true',
       },
       body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system:     buildSystem(),
-        messages:   chatHistory,
-      }),
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: m === 'master' ? 3000 : 1800,
+        system: buildSystem(m),
+        messages: histories[m],
+      })
     })
 
     const data = await res.json()
     const raw  = data.content?.[0]?.text || '{"message":"No response.","actions":[],"tips":""}'
-    chatHistory.push({ role: 'assistant', content: raw })
+    histories[m].push({ role:'assistant', content: raw })
 
     let parsed
     try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()) }
     catch { parsed = { message: raw, actions:[], tips:'' } }
 
-    removeTyping()
+    removeTyping(m)
 
-    // Execute actions via Electron IPC → bridge
-    let results = []
+    // Execute actions in order (device loads must not race in Ableton)
+    const results = []
     if (parsed.actions?.length) {
-      results = await Promise.all(
-        parsed.actions.map(a => window.mixmind.bridgeCall(a.endpoint, a.method||'POST', a.body||{}))
-      )
+      for (const a of parsed.actions) {
+        const r = await callBridge(a.endpoint, a.method || 'POST', a.body || {})
+        results.push(r)
+        const ep = (a.endpoint || '').toLowerCase()
+        if (ep.includes('/device/add')) {
+          await new Promise(res => setTimeout(res, 450))
+        }
+      }
     }
 
-    const cards = renderActionCards(parsed.actions, results)
-    const tip   = parsed.tips
-      ? `<div class="tip-block"><strong>💡 Manual tips:</strong><br>${parsed.tips}</div>`
+    const cards = renderCards(parsed.actions, results)
+    const tipClass = `tip-${m}`
+    const tip = parsed.tips
+      ? `<div class="${tipClass}"><strong>💡 ${m === 'prod' ? 'Sound design' : m === 'master' ? 'Mastering' : 'Mixing'} tips:</strong><br>${parsed.tips}</div>`
       : ''
 
-    addBubble('ai', `${parsed.message}${cards}${tip}`)
-
-  } catch (e) {
-    removeTyping()
-    addBubble('ai', `<span style="color:var(--error)">Error: ${e.message}</span>`)
-  }
-
-  document.getElementById('sendBtn').disabled = false
-  document.getElementById('chatInput').focus()
-}
-
-// ════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════
-;(async () => {
-  // Restore saved API key
-  const saved = await window.mixmind.store.get('apiKey')
-  if (saved) document.getElementById('apiKey').value = saved
-
-  // Show version
-  try {
-    const v = await window.mixmind.getVersion()
-    const vl = document.getElementById('versionLabel')
-    if (vl) vl.textContent = `v${v}`
-  } catch {}
-
-  // Listen for update notifications
-  try {
-    window.mixmind.onUpdateStatus(({ status, version, message }) => {
-      const banner = document.getElementById('updateBanner')
-      const msg    = document.getElementById('updateMsg')
-      if (!banner || !msg) return
-      msg.textContent = message
-      banner.style.display = 'flex'
-      if (status !== 'ready') {
-        // Hide restart button while downloading
-        banner.querySelector('button').style.display = 'none'
-      } else {
-        banner.querySelector('button').style.display = 'inline-block'
+    // Show device/param data inline
+    let dataDisplay = ''
+    results.forEach((r,i) => {
+      const ep = parsed.actions?.[i]?.endpoint || ''
+      if (r?.tracks?.length) {
+        dataDisplay += `<div class="${tipClass}" style="margin-top:9px"><strong>📋 Tracks from Ableton:</strong><br>` +
+          r.tracks.map(t=>`T${t.index}: <b>${t.name}</b> (vol:${t.volume?.toFixed(2)}, devices:${t.device_count})`).join('<br>') + '</div>'
+      }
+      if (r?.devices?.length) {
+        dataDisplay += `<div class="${tipClass}" style="margin-top:9px"><strong>📦 Devices:</strong><br>` +
+          r.devices.map(d=>`[${d.index}] ${d.name}`).join('<br>') + '</div>'
+      }
+      if (r?.parameters?.length) {
+        dataDisplay += `<div class="${tipClass}" style="margin-top:9px"><strong>🎛 Parameters:</strong><br>` +
+          r.parameters.slice(0,16).map(p=>`[${p.index}] ${p.name}: <b>${typeof p.value==='number'?p.value.toFixed(2):p.value}</b>`).join('<br>') +
+          (r.parameters.length > 16 ? `<br>…+${r.parameters.length-16} more` : '') + '</div>'
       }
     })
+
+    addBubble(m, 'ai', `${parsed.message}${cards}${dataDisplay}${tip}`)
+
+  } catch(e) {
+    removeTyping(m)
+    addBubble(m, 'ai', `<span style="color:#f03e3e">Error: ${e.message}</span>`)
+  }
+
+  if (btn) btn.disabled = false
+  document.getElementById(`input-${m}`)?.focus()
+}
+
+// ════════════════════════════════════════════
+// BRIDGE STATUS LISTENER
+// ════════════════════════════════════════════
+window.mixmind?.onBridgeStatus?.(({ ok }) => {
+  bridgeOk = ok
+  const d1 = document.getElementById('setupDot')
+  const d2 = document.getElementById('appDot')
+  const t1 = document.getElementById('setupBridgeText')
+  const t2 = document.getElementById('appStatus')
+  if (d1) d1.className = 'bridge-dot ' + (ok ? 'ok' : 'err')
+  if (d2) d2.className = 'bridge-dot ' + (ok ? 'ok' : 'err')
+  if (t1) { t1.textContent = ok ? 'Ableton connected ✓' : 'bridge offline'; t1.style.color = ok ? 'var(--prod)' : '#f03e3e' }
+  if (t2) t2.textContent = ok ? 'live' : 'offline'
+})
+
+// ════════════════════════════════════════════
+// UPDATER
+// ════════════════════════════════════════════
+window.mixmind?.onUpdateStatus?.(({ status, version, message }) => {
+  const banner = document.getElementById('updateBanner')
+  const msg    = document.getElementById('updateMsg')
+  if (!banner || !msg) return
+  msg.textContent = message
+  banner.style.display = 'flex'
+  banner.querySelector('button').style.display = status === 'ready' ? 'inline-block' : 'none'
+})
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+;(async () => {
+  try {
+    const v = await window.mixmind?.getVersion?.()
+    if (v) document.getElementById('versionBadge').textContent = `v${v}`
   } catch {}
 
+  try {
+    const saved = await window.mixmind?.store?.get('apiKey')
+    if (saved) document.getElementById('apiKey').value = saved
+  } catch {}
+
+  pingBridge()
+  setInterval(pingBridge, 5000)
   autoFill()
 })()
 </script>

@@ -1,0 +1,53 @@
+# PRODUCTION KNOWLEDGE & SOUND DESIGN
+
+## Sound Design Principles
+- Start with a simple patch and layer complexity gradually
+- Every element should have a purpose — cut what doesn't serve the track
+- Frequency stacking: sub occupies 20–80Hz, bass mid 80–250Hz, upper harmonics 250Hz+
+- Movement creates interest: LFO on filter cutoff, pitch automation, volume tremolo
+
+## Genre-Specific Production Notes
+
+### Electronic / Dance / House
+- Four-on-the-floor kick: punchy at 60–80Hz, click at 3–5kHz
+- Bassline: root note on beat 1, groove on beats 2–4, sidechain to kick
+- Chord stabs: short attack, medium decay, filter closed, automate filter open
+- Reverb: long pre-delay (30–50ms) to keep elements separated
+- Drop: remove everything except kick and bass — then rebuild
+
+### Hip-Hop / Trap
+- 808 bass: long decay (2–4s), tuned to key, sidechain lightly to kick
+- Snare: heavy reverb, pitched slightly, snap at 5kHz
+- Hi-hats: rolls at 1/8, 1/16, 1/32 — velocity variation essential
+- Melodic elements: keep sparse, space is the groove
+- Sample chops: chop on unexpected beats for interest
+
+### Techno / Industrial
+- Kick: distorted, sub-heavy, punchy — layers of sine + noise
+- Texture layers: noise, recorded industrial sounds, bitcrushing (Redux)
+- Minimal melody — tension and release through filter/volume automation
+- Compression: aggressive, pumping side-chain on everything to kick
+
+## Plugin Chains by Element
+
+### Kick (Production)
+1. EQ Eight: boost 60Hz, cut 300–500Hz, boost 3–5kHz
+2. Compressor: fast attack (0.1ms), medium release (50ms), 4:1
+
+### Bass / 808
+1. EQ Eight: high-pass at 30Hz, boost 80–100Hz, cut 200–400Hz
+2. Saturator: soft clip mode, subtle drive for harmonics
+3. Compressor: slow attack, fast release, 3:1 to tighten
+
+### Pads / Atmospheres
+1. Reverb: large hall, pre-delay 40ms, mix 30–50%
+2. Auto Filter: LFO on cutoff, slow rate, subtle movement
+3. EQ Eight: high-pass at 200Hz, low-pass at 10kHz
+
+## Arrangement Template
+- Intro: 8–16 bars, build tension gradually
+- Verse/A section: 16–32 bars, establish groove
+- Build: 8–16 bars, filter sweeps, rising elements, remove elements
+- Drop/Chorus: 16–32 bars, full energy
+- Break: 8–16 bars, strip back
+- Outro: 8–16 bars, remove elements one by one

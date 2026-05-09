@@ -1,0 +1,167 @@
+# FAMOUS MIX ENGINEERS — TECHNIQUES & PHILOSOPHY
+
+## Chris Lord-Alge (CLA)
+Credits: My Chemical Romance, Bon Jovi, Green Day, Muse, Pink
+Philosophy: "Excitement trumps perfection." Mix loud and in your face. Listen quietly to mix, then check loud.
+
+### CLA Approach
+- Push all faders up immediately and get a balance right away
+- EQ everything simultaneously — everything reacts off everything else
+- Only solo instruments for fine-tuning AFTER getting an overall vibe
+- Automate in real-time like a live performance — 15-30 seconds at a time
+- Fader moves matter MORE than EQ — help the song build dynamically
+- Panning is extreme: hard left, hard right, or dead centre. No subtlety.
+- Mix into the same master bus chain every session for consistency
+
+### CLA EQ Technique
+- Fast, additive approach — sweep the frequency UP first to find the sweet spot, then dial back
+- Doesn't fear large boosts (+9dB at 8kHz on vocals is common)
+- Minimal subtractive EQ — prefers to find what needs boosting
+- Piano: always needs high end boost around 5kHz — "pianos sound dull right away"
+- Always use HPF on vocals around 70-80Hz
+
+### CLA Compression
+- Vocals: aggressive 1176 compression, 15–20dB gain reduction, moderate attack, FAST release
+- This adds "spit and attitude" — almost works as tone shaping, not just dynamics
+- Parallel drums compression: always — sends drums to a parallel bus, crushes them, blends back in
+- Parallel drum bus EQ: boost 3dB at 8kHz and 3dB at 60Hz on the compressed signal
+- Master bus: SSL Compressor (−1.5 to −3dB threshold, 2:1 ratio) → Limiter → Pultec EQ
+- If mix bus compressor starts pumping, BACK OFF individual faders — don't fight the bus
+
+### CLA Guitars
+- LCR panning — left, centre, right. Never in between.
+- Don't be afraid to push low end on guitars — most engineers make them too thin
+- Use LA3A style compression for tone on guitars — "to take the harshness out"
+- Pair all guitar mono tracks into stereo pairs before EQing — "one EQ to worry about"
+
+### CLA Vocals
+- Normalise vocals to 0dBFS before processing
+- 1176 → L1 limiter chain on every vocal
+- Devil-Loc aggressive compression for attitude on rough vocals
+- Reverb AND delay simultaneously on vocals — creates depth and dimension
+- Keys: "vocals are everything in a pop song"
+
+---
+
+## Serban Ghenea
+Credits: 240+ No.1 Billboard hits — Beyoncé, Bruno Mars, Rihanna, Dua Lipa, Taylor Swift, The Weeknd
+Philosophy: "The song dictates what you need to do. Make sure the song itself is first."
+
+### Serban Approach
+- Song comes first — don't obsess over drum sounds if the song doesn't come across
+- Mix into a master chain from the very start — never mix into a naked bus
+- Minimal parallel clutter — simple sends, respect the rough mix
+- Frequent blind A/B vs. rough mix to confirm you're improving emotion, not just changing sound
+- Keep vocal path simple: tasteful de-ess, musical compression, ride delay/reverb per section
+- Wide stereo field is a signature — use stereo width extensively on pads and secondary elements
+- Verse: deliberately mostly mono. Chorus: open wide. This contrast creates massive energy lift.
+
+### Serban Mix Architecture
+- Mix into 2-bus processing from bar 1 — faders/clip gain ride INTO the existing master chain
+- Prep sessions meticulously: fix clicks, clean I/O, order tracks consistently
+- Team approach: Serban mixes, assistant John Hanes preps and prints stems
+
+### Serban Vocal Chain
+- Metric Halo Channel Strip for EQ and channel strip duties
+- Waves 1176 compressor: 3dB of compression (Blackie model, 4:1) or 10dB (Bluey model, 4:1) for in-your-face sound
+- Slow attack for staccato vocals to let them cut; fast attack for legato to smooth out
+- Release adjusted to vocal timing — releases before end of word/syllable
+- De-esser: around 5500Hz, ~6dB gain reduction
+- R-Comp, H-Delay, convolution reverbs as regular go-tos
+
+### Serban Stereo Philosophy
+- Build up instruments from 200Hz to 5kHz — use stereo WIDTH to give each element its own space
+- Kick, bass, vocals → centre always
+- Secondary elements: exploit the stereo field aggressively
+- Check mono — if something important disappears, it's too wide
+
+---
+
+## Bob Clearmountain
+Credits: Bruce Springsteen (Born in the USA), Bryan Adams, Rolling Stones, David Bowie, INXS
+Philosophy: "Listen to the song, not the individual parts. Train yourself to hear it whole."
+
+### Clearmountain Approach
+- Start with a rough mix immediately — everything up at once
+- Start with VOCALS first (not drums) — "the lyric and lead vocal matter more than anything"
+- Think of panning like a stage — where would each instrument stand?
+- Mix songs beginning to end, not in sections — "stream of consciousness"
+- Automation first pass: always the vocal — get it sitting right before anything else
+- Rides: automate AROUND the vocal, not just the vocal
+- Never solo instruments for too long — lose context of how they sit in the full mix
+- Separate kick/snare/hihat VCA group from toms/overheads — ride tom fills independently
+
+### Clearmountain Panning
+- Vocals: channel 24 (centre of console)
+- Backing vocals: left or right of centre
+- Guitars: left side
+- Drums: further left
+- Percussion: hard left
+- Keyboards: right
+- Strings/horns: hard right
+
+### Clearmountain Philosophy on Song Building
+- "Does it add anything to the song?" — if not, bring it back in the mix or mute it
+- The guitar lick may be great but if it pulls attention from a lyric, it gets turned down
+- Automation should make each section feel more dramatic — dynamics judged by ear, not level
+- Don't think technically — interact with music in an emotional, feel-based way
+
+---
+
+## Michael Brauer — "BRAUERIZE"
+Credits: Coldplay (Viva La Vida, Parachute), Bob Dylan, Aretha Franklin, James Brown, Paul McCartney
+Philosophy: "Mix INTO compression, not through it." Multiple parallel bus approach.
+
+### The Brauerize Technique
+Brauer routes everything through 4 parallel stereo subgroup buses (A, B, C, D), each with different compression, then sums to master. Nothing goes to master bus directly except through these buses.
+
+- Bus A (TOP END / SUSTAIN): Neve 33609-style compressor. Pads, strings, Rhodes, sustaining elements. Ratio 2:1, slow attack, auto release. 1–3dB GR. Warms up tails and makes ambient parts thicker.
+- Bus B (BOTTOM END): Distressor-style compressor, fast attack, fast release. Drums AND bass. Keeps them locked together and hitting hard.
+- Bus C (GUITARS/MID): JoeMeek or Pendulum-style. Guitars, keys. Mid-range colour.
+- Bus D (COLOUR/DRIVE): Additional character compression for elements that need attitude.
+
+Key rule: instruments can be sent to MULTIPLE buses simultaneously. A guitar might go to both C and A — this is the secret to how elements sit together.
+
+### Brauerize Vocal Treatment
+Lead vocal is "floated" — never goes to master bus directly.
+- Pre-fader: gentle LA-2A style compression to control peaks and tame dynamics
+- Then floated out to 4 PARALLEL compressor returns, each with different tonal character
+- Compressors: 1 for "head tone", 1 for "throat", 1 for "chest", 1 for "air"
+- Each compressor contributes ~1dB gain reduction
+- Blend between them to shape the tonal quality of the vocal
+- Reverb feeds from the DRY vocal BEFORE the post-compressors — "creating beautiful depth"
+
+### Brauerize Philosophy
+- "The purpose of multiple buses is to avoid having one instrument adversely affect the level or sound of another"
+- Gives independence between elements while maintaining glue
+- Results: more natural depth of field, implied dynamics, musical movement
+- Technique was born solving a specific problem: client wanted more bass, but adding it made vocals drop
+
+---
+
+## Andrew Scheps
+Credits: Adele, Metallica, Jay-Z, Red Hot Chili Peppers, Black Sabbath, U2
+Philosophy: 100% in the box. Heavy parallel processing. "All that matters is what's coming out of the speakers."
+
+### Scheps Rear Bus Technique
+Inspired by working on a Neve designed for quadraphonic sound. Creates a copy of the whole mix (everything except drums) sent to a stereo parallel compression bus. Heavily compress this bus and blend back in. Creates punch and vital energy without killing the original transients.
+
+Steps:
+1. Post-fader send from every track EXCEPT drums to a parallel stereo aux
+2. Crush with heavy compression (1176 or LA-2A style)
+3. Blend compressed signal back alongside original — never replaces it
+4. Adjust blend level for the desired impact
+
+### Scheps Parallel Processing
+- Multiple compressors in parallel — each a different flavor/character
+- 1176 and LA-2A side by side, hear differences, blend
+- Don't EQ the parallel returns unless correcting a problem
+- Short, transparent reverbs — "short slaps and ambiences" not long halls
+- Pare down spatial effects — less is more
+- Static balance takes several passes to get right — faders go up multiple times
+
+### Scheps Vocals
+- HPF cut at ~100Hz with wide shelf, less than 3dB
+- Boost high end at ~8kHz around 3dB
+- Heavy parallel compression on high end: threshold around -36dB above 1kHz, soft knee, 4:1 ratio, attack 10ms, release 120ms
+- This creates clarity and presence without killing dynamics below 1kHz

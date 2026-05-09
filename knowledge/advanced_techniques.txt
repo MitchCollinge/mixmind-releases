@@ -1,0 +1,160 @@
+# ADVANCED MIXING TECHNIQUES & PSYCHOACOUSTICS
+
+## FREQUENCY MAP
+
+### Sub Bass (20-60Hz)
+- Physical sensation, felt more than heard
+- Kick drum fundamental (50-60Hz), sub bass root (40-60Hz)
+- Keep MONO in this region — stereo sub causes phase problems and club system issues
+- Too much: muddy, loses definition on small speakers
+- Too little: thin, lacks power on club systems
+
+### Bass (60-250Hz)
+- 80-120Hz: body/weight of bass — boost for thickness
+- 100-200Hz: muddiness zone — cut if mix sounds wooly or thick
+- 200-250Hz: warmth — a little adds body, too much = mud
+
+### Low Mids (250-500Hz)
+- "The mud zone" — always suspect here first
+- 300-400Hz: boxy sound on snare/vocal — cut if hollow
+- 400-600Hz: nasal quality — cut if honky or nasal
+- Almost always cut, rarely boost
+
+### Midrange (500Hz-2kHz)
+- Where most instruments live
+- 1-2kHz: bite and attack — boost for aggression and presence
+- 1.5kHz: harshness zone — cut if mix sounds aggressive/harsh
+- 2kHz: forward presence — boost to push element forward
+
+### Upper Mids (2-8kHz)
+- Most sensitive range for human hearing
+- 2-4kHz: vocal presence, guitar pick attack, snare crack
+- 3-5kHz: kick click, snare crack
+- 4-6kHz: sibilance/de-essing zone
+- 6-8kHz: air and sparkle
+
+### Air (8kHz+)
+- 8-12kHz: cymbal shimmer, vocal air, synth brightness
+- 12-16kHz: shelf boost here for open, airy sound
+- Boost air AFTER compression — boosting before acts as de-essing
+
+---
+
+## COMPRESSION GUIDE
+
+### Attack & Release
+- Fast attack (0.1-5ms): tames transients, reduces punch — tightening
+- Slow attack (10-50ms): lets transients through, adds punch — kick, snare
+- Fast release (50-200ms): density, can pump — parallel drums
+- Slow release (200ms-1s): smooth, natural — vocals, full mix
+
+### Ratio Guide
+- 2:1 — transparent, mix bus, gentle control
+- 4:1 — moderate, audible but musical — vocals, bass
+- 8:1 — firm, aggressive parallel drums
+- 10:1+ — limiting, peak control
+
+### Compressor Types
+- 1176 (FET): fast and aggressive — vocal excitement, parallel drums, kick snap
+- LA-2A (Optical): smooth, program-dependent — vocals, bass, acoustics
+- VCA (SSL/Glue): tight and punchy — mix bus, drum bus, group bus
+- Variable-Mu: warm and vintage — mix bus glue
+
+### New York Parallel Compression (Scheps Method)
+1. Create return channel from track or drum bus
+2. Compress HEAVILY on return (30:1, very low threshold)
+3. Blend return at -20 to -30dB below dry signal
+4. Result: dry transients + compressed sustain = punchy and dense
+
+---
+
+## PSYCHOACOUSTICS
+
+### Loudness Illusions
+- Louder ALWAYS sounds better in A/B — level-match before comparing
+- Dynamic range creates PERCEIVED loudness — quiet verse makes chorus feel louder
+- Train yourself: turn down the louder version and ask if it still sounds better
+
+### Fletcher-Munson Curves
+- Human hearing most sensitive at 2-5kHz
+- We hear LESS bass at low volumes — mix at moderate levels (75-80dB SPL)
+- Check at low volume: if bass disappears, it was only "loudness effect"
+- CLA: mix quietly, check at loud for excitement
+
+### Masking
+- Frequency masking: two sounds at same frequency = one disappears
+- Fix: EQ carving, sidechaining, panning, arrangement
+
+### The 3D Soundstage
+- Left-Right: panning
+- Front-Back: reverb amount (more = further back) + high frequency content
+- Up-Down: EQ (high freq = "higher" perceived position)
+- Depth: roll off highs on background elements, add pre-delay to reverb sends
+
+---
+
+## MASTER TECHNIQUES FROM THE PROS
+
+### The Ghenea Contrast Trick
+- Apply HPF AND LPF on master bus automation
+- Verse: filters ON (narrower frequency range)
+- Chorus: filters OFF (full frequency range) — instant huge impact
+- Chorus sounds HUGE without raising a fader
+
+### CLA Lightning Speed EQ
+- Solo instrument
+- Sweep high shelf up until too bright → back off just before that point
+- This takes 10-15 seconds total — don't overthink
+- Repeat for low shelf and high-mid presence
+
+### The Pultec Trick (Low End)
+- Boost AND cut the same frequency on Pultec-style EQ
+- Boost 60Hz AND cut 100Hz = tight, punchy low end
+- In Ableton EQ Eight: boost at 60Hz (bell) + cut at 100-120Hz (shelf or bell)
+
+### Kick/Bass Frequency Separation
+- Find kick fundamental (50-80Hz) — boost here on kick, CUT on bass
+- Find bass fundamental — boost here on bass, CUT on kick
+- Both occupy own frequency space — both audible without masking
+- Also try sidechaining: bass ducks slightly when kick hits
+
+### Mono Compatibility Check
+1. Utility device → Width to 0 (mono sum)
+2. Check: does bass disappear? (phase cancellation = fix)
+3. Do elements disappear completely? (phase problem = fix panning/phase)
+4. Club systems often run mono — critical check for dance music
+
+### Reference Track Workflow
+1. Import commercial reference into Ableton
+2. Level-match: reduce reference gain 6-10dB to match your mix
+3. Spectrum analyzer: compare frequency balance
+4. A/B rapidly in first 3 seconds — ears reset quickly
+5. Note: more/less bass? brighter/darker? wider/narrower?
+
+---
+
+## COMMON GENRE SIGNATURES
+
+### Electronic / House
+- Kick: 60Hz punch, 3-5kHz click, 80-90dB in mix
+- Bass: sidechained to kick, 80-120Hz body, sub below 60Hz
+- Pads: wide stereo, high-passed 200-400Hz, reverb tail
+- Hi-hats: bright, 8kHz+, velocity varied
+
+### Hip-Hop / Trap
+- 808: tuned to key, long decay (2-4s), mono low end
+- Snare/clap: heavy reverb, 200Hz body, 5kHz snap
+- Hi-hats: rolls at 1/16, 1/32, velocity automation essential
+- Vocal: very forward, no excessive reverb, dry and present
+
+### Pop
+- Vocal: center and forward, everything else serves it
+- Production: contrast verse/chorus, build and release
+- Low end: clean, punchy, sub audible but controlled
+- Wide: pads and guitars spread, kick/bass/lead mono
+
+### Rock
+- Guitar: LCR panning for doubles, mid-range weight
+- Drums: punch and attack, parallel compression
+- Vocal: present but sits with the band, not above it
+- Low end: tight, not as prominent as in electronic music

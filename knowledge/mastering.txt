@@ -1,0 +1,65 @@
+# MASTERING KNOWLEDGE & STANDARDS
+
+## Pre-Mastering Checklist
+- Mix headroom: master channel should peak at -6 to -3dBFS before mastering chain
+- Check for clipping on individual tracks — none allowed
+- Remove any processing from master bus that was there for referencing
+- Ensure kick and bass are balanced and not fighting
+- Check stereo width — bass below 100Hz should be mono
+- Listen on multiple systems: studio monitors, headphones, earbuds, phone speaker
+
+## Mastering Chain Order (Ableton Native)
+1. EQ Eight — broad tonal shaping (no more than ±3dB moves)
+2. Glue Compressor — bus glue (ratio 2:1, slow attack, auto release, 1–2dB GR max)
+3. Multiband Dynamics — only if specific problem frequencies (optional)
+4. Limiter — final loudness and ceiling
+
+## Target Loudness Standards
+
+### Spotify / Apple Music / YouTube Music
+- Target: −14 LUFS integrated
+- True Peak: −1dBTP maximum
+- Dynamic Range: aim for DR8 or higher
+- Strategy: gentle limiting, preserve dynamics
+
+### Beatport / Club / DJ
+- Target: −9 to −10 LUFS integrated
+- True Peak: −0.5dBTP maximum  
+- Strategy: more aggressive limiting acceptable, loud is expected
+- Check: ensure it competes with reference tracks in the same genre
+
+### CD / Download
+- Target: −10 LUFS integrated
+- True Peak: −0.3dBTP maximum
+- Strategy: balanced approach
+
+### Apple Music Mastered for iTunes / Lossless
+- Target: −16 LUFS integrated
+- True Peak: −1dBTP maximum
+- Strategy: more headroom, higher quality conversion
+
+### Film / TV Sync
+- Target: −24 LUFS integrated (EBU R128)
+- True Peak: −2dBTP maximum
+- Strategy: preserve maximum dynamics, minimal compression
+
+## EQ Moves on Master Bus
+- High-pass: gently roll off below 20–30Hz (remove inaudible sub rumble)
+- Low-end shelf: subtle boost/cut at 60–80Hz for body
+- Mid presence: gentle boost 2–4kHz for clarity if needed (no more than +1dB)
+- Air: subtle boost 12–16kHz (no more than +1.5dB) for brightness
+- NEVER cut more than -3dB on master EQ
+
+## Limiter Settings (Ableton Limiter)
+- Gain: set so output hits ceiling consistently but not constantly
+- Ceiling: set per target standard (see above)
+- Lookahead: 1.5ms for transient-heavy music, 3ms for smoother material
+- Release: auto for most material
+- True Peak: ON always for streaming
+
+## Common Mastering Mistakes to Avoid
+- Over-limiting — kills dynamics and causes listener fatigue
+- Too much high-end boost — sounds harsh, especially on streaming
+- Ignoring low end in mono — phase issues kill the bass
+- Not referencing — always A/B against a commercial release
+- Mastering a bad mix — mastering can't fix a mix problem

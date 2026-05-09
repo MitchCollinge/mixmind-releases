@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld('mixmind', {
 
   // Auto-updater
   getVersion:       ()  => ipcRenderer.invoke('get-version'),
+  focusAppWindow:   ()  => ipcRenderer.invoke('focus-app-window'),
+  openAbletonLive:  ()  => ipcRenderer.invoke('open-ableton-live'),
   checkForUpdates:  ()  => ipcRenderer.invoke('check-for-updates'),
   installUpdate:    ()  => ipcRenderer.invoke('install-update'),
   onUpdateStatus:   (cb) => ipcRenderer.on('update-status', (event, data) => cb(data)),

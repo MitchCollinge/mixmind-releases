@@ -1,0 +1,175 @@
+# WORLD-CLASS MIXING ENGINEER TECHNIQUES
+
+## CHRIS LORD-ALGE (CLA) — Rock & Pop Mixing Legend
+Credits: Green Day, Foo Fighters, My Chemical Romance, Bruce Springsteen, Muse
+
+### Core Philosophy
+- "Excitement trumps perfection" — make mixes exciting, not technically perfect
+- Mix at low volumes (like NS-10s) — if it sounds powerful quietly, it'll destroy at volume
+- Push all faders up immediately and get a balance — don't solo and tinker first
+- EQ everything simultaneously because everything reacts off everything else
+- Automate like a live performance — bold moves, 15-30 seconds at a time
+
+### Drums (CLA Method)
+- Parallel compression on drums ALWAYS — separate room mic pass with no cymbals for aggressive compression
+- Unlink left/right on parallel compressor — asymmetric compression creates natural feel
+- On parallel bus: boost 3dB at 8kHz and 3dB at 60Hz to add emphasis
+- Master bus chain: SSL Compressor → Limiter → Pultec EQ
+- SSL bus compressor: threshold -1.5 to -3dB, ratio 2:1 — if it pumps, pull back faders
+- Room mics: compress HARD since cymbals are on separate pass
+
+### Vocals (CLA Method)
+- Normalize all vocals to 0dBFS before processing
+- 1176 compressor with moderate attack, FAST release — 15-20dB of gain reduction is not unusual
+- Don't tweak attack/release obsessively — push it hard and make it exciting
+- Use L1/L2 limiter on vocals for "spit and attitude" — works almost like an EQ
+- HPF at 70Hz on vocals always
+- Boost 8-9kHz aggressively (he's boosted 9dB at 8kHz on SSL EQ)
+- Parallel distortion on reverb return (Devil-Loc style) for aggression
+
+### EQ Philosophy (CLA)
+- Mostly ADDITIVE EQ — large boosts at lows and highs, minimal mid cuts
+- Boost lows and highs broadly: keeps midrange character intact, avoids resonance
+- Boosting before compression: high end boost makes compressor act as de-esser
+- "Magic frequencies": 5kHz for piano presence, 8kHz for vocal air and spit
+- EQ quickly — calibrate ears by quickly sweeping between dark and bright
+
+### Panning (CLA)
+- LCR panning ONLY — left, right, or center. No subtle panning
+- Vocals, kick, snare, bass → center always
+- Guitars → hard left and right (±0.8 to ±1.0)
+- Hi-hat → wherever it is in the overheads, don't try to match mic position
+- Make stereo tracks from mono doubles before processing
+
+---
+
+## SERBAN GHENEA — Modern Pop Mixing Master
+Credits: Taylor Swift, The Weeknd, Katy Perry, Bruno Mars, Doja Cat, Troye Sivan
+
+### Core Philosophy
+- Fully in-the-box (ITB) — no outboard gear
+- Master bus filtering trick: filter low and high end in verses, bypass for chorus — instant impact and size
+- Simplicity in arrangement: fewer elements done perfectly beats many elements done adequately
+- The three anchors of any mix: kick, bass, lead vocal — everything else supports them
+- Vocals forward, wide stereo image, kick/bass locked tight in mono
+
+### Vocal Chain (Serban Method)
+- High-pass filter first: 80-150Hz depending on vocalist
+- Metric Halo Channel Strip for surgical EQ — narrow Q to notch offensive 800Hz-2.5kHz frequencies
+- LA-2A in limit mode (slow attack) → 1176 (fast attack, fast release) in series
+  - LA-2A controls and smooths
+  - 1176 brings up consonants and detail at word endings
+- FabFilter Pro-Q 3 for surgical dynamic EQ work
+- De-esser after compression
+- Delay: slap around 110ms range
+- Reverb: subtle in verse (close/intimate feel), opens up in chorus (sense of space growing)
+
+### Low-End Approach (Serban)
+- Kick tuned to key of song — fundamental frequency matches chord root
+- Bass notes never clash with kick frequencies — arranged from composition stage
+- Kick occupies 0-150Hz in verses, sub bass adds in chorus
+- Master bus: high-pass and low-pass filters as AUTOMATION for section contrast
+
+### Stereo Field (Serban)
+- Super wide mix — uses stereo width on everything except kick/bass/lead vocal
+- Kick and bass drive at constant level throughout track
+- Reverb on vocal opens up chorus vs verse for spatial contrast
+
+---
+
+## BOB CLEARMOUNTAIN — Rock & Pop Pioneer
+Credits: Bruce Springsteen, Rolling Stones, David Bowie, Bryan Adams, INXS
+
+### Core Philosophy
+- Start with vocals — the lyric and lead vocal matter more than anything
+- Think of panning as a stage — place instruments where they'd stand on a live stage
+- Listen to the WHOLE song, not individual parts — what pulls your ear away from the vocal?
+- "Mix quickly" — get 90% there in the first pass, spend the rest fine-tuning
+- Mix songs beginning to end, not in loops — treat it like a live performance
+
+### Workflow
+1. Put everything up at once — rough mix to hear what's there
+2. Solo individual tracks to understand each track's "role"
+3. Set pan positions thinking of it as a stage
+4. Get basic drum balance
+5. Mix beginning to end without automation first
+6. First automation pass: nail the vocal ride
+7. Subsequent passes: ride everything else around the vocal
+
+### Stage Placement (Clearmountain)
+- Vocals: center (channel 24 on his console)
+- Backing vocals: left and right of center
+- Guitars: left side
+- Drums: further left, percussion far left
+- Keyboards: right side
+- Strings/horns: far right
+- Color code tracks: guitars blue, keys green, drums black
+
+### Philosophy on Parts
+- Not every lick needs to be heard — if a guitar part pulls attention from the vocal at an important lyric, pull it back
+- Train yourself to hear the song, not individual parts
+- Things that are wrong will JUMP OUT when listening to the whole mix
+- Make important things louder, unimportant things quieter — that's mixing
+
+---
+
+## ANDREW SCHEPS — Modern Rock & Pop (Adele, RHCP, Metallica, Jay-Z)
+
+### Parallel Compression (Scheps Method) — His Signature
+- Uses ~30 parallel compressors simultaneously as send/return (like reverb sends)
+- Direct track stays 100% dry — all compression is blended in from the side
+- Never directly compresses tracks (except vocals get direct compression too)
+- Shared compressors: kick, bass, drums share some; guitars/synths share others
+- The mix "mixes itself" — when vocal is loud it turns guitars down via the shared compressor
+
+### Why Parallel > Insert Compression
+- Insert compression catches peaks and turns them DOWN — kills transients
+- Parallel compression brings up the QUIET STUFF without touching peaks
+- Preserves the uncompressed attack/transient (emotion/feel) while adding density
+- You blend HOW MUCH compressed sound you want — infinite control
+- "The uncompressed vocal carries all the emotion" — protect it
+
+### Vocal Processing (Scheps)
+- Pre-EQ: cut 100Hz shelf (-3dB wide) + boost 8kHz (+3dB)
+- Parallel compress aggressively with threshold around -36dB above 1kHz (high-only compression)
+- Post-EQ: boost 100Hz (+2.5dB) + gentle high cut at 10kHz (-1.5dB)
+- Adds warmth back and removes harshness while keeping presence
+- Additional parallel: saturated/distorted version blended under main vocal for warmth
+
+### Drum Setup (Scheps)
+- Start with kick and snare LOCKED — everything else built around them
+- Overheads and room fill in the space after kick/snare are right
+- Parallel distortion on drums (iZotope Trash + heavy EQ before/after) = "room sound without reverb"
+- Saturation via Soundtoys Decapitator on drums, guitars, synths for energy and character
+
+### Going ITB (Scheps Lessons)
+- UAD 1176 and LA-2A plugins — sometimes prefers to hardware for flexibility/recall
+- Waves SSL E-Channel: workhorse channel strip for EQ, compression, gate
+- Soundtoys EchoBoy: go-to delay for everything
+- FabFilter Pro-Q 3: surgical EQ when needed
+- The tools don't matter — the approach does
+
+---
+
+## MIXED ENGINEER WISDOM
+
+### Universal Truths from the Masters
+1. **The vocal is everything** (Clearmountain, Ludwig, CLA) — if the vocal isn't right, nothing else matters
+2. **Parallel compression preserves feel** (Scheps) — blend compressed signal, keep dry transients
+3. **Less is more** (Rubin, Ghenea) — perfect 8 elements beats mediocre 20
+4. **Mix quickly, trust your ears** (Clearmountain, CLA) — first impressions are usually right
+5. **Check mono** (Ghenea, everyone) — if it sounds good in mono, it sounds great in stereo
+6. **Reference constantly** — A/B against commercial tracks in same genre throughout
+7. **Louder is not better** (Ludwig, Scheps) — dynamics are what create impact and emotional response
+8. **Automation is mixing** (CLA) — fader rides are MORE important than EQ moves
+
+### Compression Philosophies Compared
+- CLA: Aggressive, fast, exciting — 15-20dB GR on vocals, hard parallel on drums
+- Scheps: All parallel, preserve transients, blend for density not clamp for control
+- Ghenea: Surgical and transparent — LA-2A into 1176 series, controlled and smooth
+- Clearmountain: Subtle, musical — compression serves the song not the meter
+
+### The Mix Bus
+- CLA: Always mix into SSL comp + limiter + Pultec — threshold -1.5 to -3dB, 2:1
+- Scheps: Light overall parallel compression on everything (shared bus)
+- Ludwig: Master bus compression should enhance, not define — if you hear it pump, ease off

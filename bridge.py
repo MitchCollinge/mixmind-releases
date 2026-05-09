@@ -1,212 +1,248 @@
 #!/usr/bin/env python3
 """
-MixMind OSC Bridge v2 — with device control
-Adds: list devices, get/set parameters, add devices, query parameter names
+MixMind TCP Bridge v4
+Replaces the OSC bridge entirely.
+Connects to the MixMind Remote Script running inside Ableton via TCP socket.
+Much more reliable than OSC — native two-way communication, no reply timeouts.
 """
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pythonosc import udp_client, dispatcher, osc_server
+import socket
+import json
 import threading
 import logging
 
-ABLETON_HOST     = "127.0.0.1"
-ABLETON_OSC_PORT = 11000
-ABLETON_REPLY    = 11001
-BRIDGE_PORT      = 5005
-REPLY_TIMEOUT    = 3.0
+ABLETON_HOST = "127.0.0.1"
+ABLETON_PORT = 65432
+BRIDGE_PORT  = 5005
 
-osc_out = udp_client.SimpleUDPClient(ABLETON_HOST, ABLETON_OSC_PORT)
-app     = Flask(__name__)
+app = Flask(__name__)
 CORS(app)
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
-# ── OSC reply listener ────────────────────────────────────────────────────────
-_reply_store  = {}
-_reply_events = {}
+# ── TCP connection pool ────────────────────────────────────────────────────────
+_lock    = threading.Lock()
+_io_lock = threading.Lock()  # one in-flight request per socket (Flask is multi-threaded)
+_socket  = None
 
-def start_reply_listener():
-    try:
-        d = dispatcher.Dispatcher()
-        def default_handler(addr, *args):
-            _reply_store[addr] = list(args)
-            if addr in _reply_events:
-                _reply_events[addr].set()
-        d.set_default_handler(default_handler)
-        server = osc_server.ThreadingOSCUDPServer(("0.0.0.0", ABLETON_REPLY), d)
-        threading.Thread(target=server.serve_forever, daemon=True).start()
-        print(f"OSC reply listener on port {ABLETON_REPLY}")
-    except Exception as e:
-        print(f"Warning: reply listener failed: {e}")
+def get_socket():
+    global _socket
+    with _lock:
+        if _socket is None:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # Live API work runs on the main thread; large sessions need headroom
+                s.settimeout(60.0)
+                s.connect((ABLETON_HOST, ABLETON_PORT))
+                _socket = s
+            except Exception as e:
+                return None, str(e)
+        return _socket, None
 
-def send_and_wait(address, *args, timeout=REPLY_TIMEOUT):
-    event = threading.Event()
-    _reply_events[address] = event
-    _reply_store.pop(address, None)
-    try:
-        osc_out.send_message(address, list(args) if args else [])
-        event.wait(timeout=timeout)
-        return _reply_store.get(address)
-    finally:
-        _reply_events.pop(address, None)
+def send_command(command, params=None):
+    """Send a command to Ableton and return the response."""
+    global _socket
+    if params is None:
+        params = {}
+    msg = json.dumps({"command": command, "params": params}) + "\n"
 
-def send(address, *args):
-    try:
-        osc_out.send_message(address, list(args) if args else [])
-        return {"ok": True, "osc": address, "args": list(args)}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+    for attempt in range(2):
+        with _io_lock:
+            sock, err = get_socket()
+            if err:
+                return {"ok": False, "error": f"Cannot connect to Ableton: {err}"}
+            try:
+                sock.sendall(msg.encode("utf-8"))
+                response = ""
+                while True:
+                    chunk = sock.recv(65536)
+                    if not chunk:
+                        raise ConnectionError("Ableton closed the connection")
+                    response += chunk.decode("utf-8")
+                    if "\n" in response:
+                        break
+                line = response.split("\n", 1)[0]
+                return json.loads(line)
+            except json.JSONDecodeError as e:
+                return {"ok": False, "error": f"Invalid JSON from Ableton: {e}"}
+            except Exception as e:
+                with _lock:
+                    try:
+                        _socket.close()
+                    except Exception:
+                        pass
+                    _socket = None
+                if attempt == 1:
+                    return {"ok": False, "error": str(e)}
 
 # ── Transport ──────────────────────────────────────────────────────────────────
 @app.route("/play",      methods=["POST"])
-def play():      return jsonify(send("/live/song/start_playing"))
+def play():      return jsonify(send_command("start_playing"))
 
 @app.route("/stop",      methods=["POST"])
-def stop():      return jsonify(send("/live/song/stop_playing"))
+def stop():      return jsonify(send_command("stop_playing"))
 
 @app.route("/tempo",     methods=["POST"])
 def tempo():
-    return jsonify(send("/live/song/set/tempo", float(request.json.get("bpm", 120))))
+    return jsonify(send_command("set_tempo", {"bpm": float(request.json.get("bpm", 120))}))
 
-@app.route("/metronome", methods=["POST"])
-def metronome():
-    return jsonify(send("/live/song/set/metronome", int(request.json.get("on", 1))))
+@app.route("/undo",      methods=["POST"])
+def undo():      return jsonify(send_command("undo"))
 
-# ── Clips ──────────────────────────────────────────────────────────────────────
-@app.route("/clip/play", methods=["POST"])
-def clip_play():
-    return jsonify(send("/live/clip/fire",
-        int(request.json.get("track", 0)), int(request.json.get("clip", 0))))
+@app.route("/redo",      methods=["POST"])
+def redo():      return jsonify(send_command("redo"))
 
-@app.route("/clip/stop", methods=["POST"])
-def clip_stop():
-    return jsonify(send("/live/track/stop_all_clips", int(request.json.get("track", 0))))
+@app.route("/app/open", methods=["POST"])
+def open_desktop_app():
+    """Ask the Ableton Remote Script to open/focus the MixMind desktop app (mixmind://)."""
+    d = request.get_json(silent=True) or {}
+    return jsonify(send_command("open_mixmind", dict(d)))
 
-# ── Tracks ─────────────────────────────────────────────────────────────────────
+# ── Session info ───────────────────────────────────────────────────────────────
+@app.route("/session",   methods=["GET"])
+def session():   return jsonify(send_command("get_session_info"))
+
+@app.route("/tracks",    methods=["GET"])
+def tracks():    return jsonify(send_command("get_tracks"))
+
+@app.route("/track",     methods=["GET"])
+def track():
+    idx = int(request.args.get("index", 0))
+    return jsonify(send_command("get_track", {"track_index": idx}))
+
+# ── Track control ──────────────────────────────────────────────────────────────
 @app.route("/track/volume", methods=["POST"])
 def track_volume():
-    return jsonify(send("/live/track/set/volume",
-        int(request.json.get("track", 0)), float(request.json.get("volume", 0.85))))
+    d = request.json
+    return jsonify(send_command("set_track_volume", {
+        "track_index": int(d.get("track", 0)),
+        "volume":      float(d.get("volume", 0.85))
+    }))
 
 @app.route("/track/pan", methods=["POST"])
 def track_pan():
-    return jsonify(send("/live/track/set/panning",
-        int(request.json.get("track", 0)), float(request.json.get("pan", 0.0))))
+    d = request.json
+    return jsonify(send_command("set_track_pan", {
+        "track_index": int(d.get("track", 0)),
+        "pan":         float(d.get("pan", 0.0))
+    }))
 
 @app.route("/track/mute", methods=["POST"])
 def track_mute():
-    return jsonify(send("/live/track/set/mute",
-        int(request.json.get("track", 0)), int(request.json.get("mute", 1))))
+    d = request.json
+    return jsonify(send_command("set_track_mute", {
+        "track_index": int(d.get("track", 0)),
+        "mute":        bool(d.get("mute", True))
+    }))
 
 @app.route("/track/solo", methods=["POST"])
 def track_solo():
-    return jsonify(send("/live/track/set/solo",
-        int(request.json.get("track", 0)), int(request.json.get("solo", 1))))
+    d = request.json
+    return jsonify(send_command("set_track_solo", {
+        "track_index": int(d.get("track", 0)),
+        "solo":        bool(d.get("solo", True))
+    }))
 
 @app.route("/track/arm", methods=["POST"])
 def track_arm():
-    return jsonify(send("/live/track/set/arm",
-        int(request.json.get("track", 0)), int(request.json.get("arm", 1))))
+    d = request.json
+    return jsonify(send_command("set_track_arm", {
+        "track_index": int(d.get("track", 0)),
+        "arm":         bool(d.get("arm", True))
+    }))
 
-# ── Scenes ─────────────────────────────────────────────────────────────────────
-@app.route("/scene/play", methods=["POST"])
-def scene_play():
-    return jsonify(send("/live/scene/fire", int(request.json.get("scene", 0))))
-
-# ── Undo/Redo ──────────────────────────────────────────────────────────────────
-@app.route("/undo", methods=["POST"])
-def undo(): return jsonify(send("/live/song/undo"))
-
-@app.route("/redo", methods=["POST"])
-def redo(): return jsonify(send("/live/song/redo"))
-
-# ── Device listing ─────────────────────────────────────────────────────────────
+# ── Devices ────────────────────────────────────────────────────────────────────
 @app.route("/track/devices", methods=["GET"])
 def track_devices():
-    track = int(request.args.get("track", 0))
-    reply = send_and_wait("/live/track/get/devices", track)
-    if reply is None:
-        return jsonify({"ok": False, "error": "No reply from Ableton"})
-    devices = []
-    i = 0
-    data = reply if isinstance(reply, list) else []
-    while i + 1 < len(data):
-        devices.append({"index": data[i], "name": data[i+1]})
-        i += 2
-    return jsonify({"ok": True, "track": track, "devices": devices})
+    idx = int(request.args.get("track", 0))
+    return jsonify(send_command("get_track_devices", {"track_index": idx}))
 
-# ── Device parameters ──────────────────────────────────────────────────────────
 @app.route("/device/parameters", methods=["GET"])
-def device_parameters():
-    track  = int(request.args.get("track", 0))
-    device = int(request.args.get("device", 0))
-    names  = send_and_wait("/live/device/get/parameters/name",  track, device)
-    values = send_and_wait("/live/device/get/parameters/value", track, device)
-    mins   = send_and_wait("/live/device/get/parameters/min",   track, device)
-    maxs   = send_and_wait("/live/device/get/parameters/max",   track, device)
-    if names is None:
-        return jsonify({"ok": False, "error": "No reply from Ableton"})
-    params = []
-    for i, name in enumerate(names):
-        params.append({
-            "index": i,
-            "name":  name,
-            "value": values[i] if values and i < len(values) else None,
-            "min":   mins[i]   if mins   and i < len(mins)   else None,
-            "max":   maxs[i]   if maxs   and i < len(maxs)   else None,
-        })
-    return jsonify({"ok": True, "track": track, "device": device, "parameters": params})
+def device_params():
+    return jsonify(send_command("get_device_parameters", {
+        "track_index":  int(request.args.get("track", 0)),
+        "device_index": int(request.args.get("device", 0)),
+    }))
 
 @app.route("/device/parameter/set", methods=["POST"])
 def device_param_set():
-    d      = request.json
-    track  = int(d.get("track",  0))
-    device = int(d.get("device", 0))
-    param  = int(d.get("param",  0))
-    value  = float(d.get("value", 0))
-    return jsonify(send("/live/device/set/parameter/value", track, device, param, value))
+    d = request.json
+    return jsonify(send_command("set_device_parameter", {
+        "track_index":  int(d.get("track", 0)),
+        "device_index": int(d.get("device", 0)),
+        "param_index":  int(d.get("param", 0)),
+        "value":        float(d.get("value", 0)),
+    }))
 
-@app.route("/device/parameter/get", methods=["GET"])
-def device_param_get():
-    track  = int(request.args.get("track",  0))
-    device = int(request.args.get("device", 0))
-    param  = int(request.args.get("param",  0))
-    reply  = send_and_wait("/live/device/get/parameter/value", track, device, param)
-    if reply is None:
-        return jsonify({"ok": False, "error": "No reply"})
-    return jsonify({"ok": True, "value": reply[0] if reply else None})
-
-# ── Add device (requires device_loader.py patch in AbletonOSC) ────────────────
 @app.route("/device/add", methods=["POST"])
 def device_add():
-    d     = request.json
-    track = int(d.get("track", 0))
-    name  = str(d.get("device", ""))
-    reply = send_and_wait("/live/track/add_device", track, name, timeout=5.0)
-    if reply is None:
-        return jsonify({
-            "ok": False,
-            "error": "No reply — install device_loader.py in AbletonOSC folder"
-        })
-    return jsonify({
-        "ok":      bool(reply[0]) if reply else False,
-        "message": reply[1] if len(reply) > 1 else ""
-    })
+    d = request.json
+    return jsonify(send_command("load_device", {
+        "track_index": int(d.get("track", 0)),
+        "device_name": str(d.get("device", "")),
+    }))
 
-# ── Device on/off ──────────────────────────────────────────────────────────────
-@app.route("/device/enable", methods=["POST"])
-def device_enable():
-    d      = request.json
-    track  = int(d.get("track",  0))
-    device = int(d.get("device", 0))
-    state  = int(d.get("on",     1))
-    return jsonify(send("/live/device/set/enabled", track, device, state))
+# ── Clips & scenes ─────────────────────────────────────────────────────────────
+@app.route("/clip/play", methods=["POST"])
+def clip_play():
+    d = request.json
+    return jsonify(send_command("fire_clip", {
+        "track_index": int(d.get("track", 0)),
+        "clip_index":  int(d.get("clip", 0)),
+    }))
+
+@app.route("/clip/stop", methods=["POST"])
+def clip_stop():
+    d = request.json
+    return jsonify(send_command("stop_track_clips", {
+        "track_index": int(d.get("track", 0))
+    }))
+
+@app.route("/scene/play", methods=["POST"])
+def scene_play():
+    d = request.json
+    return jsonify(send_command("fire_scene", {
+        "scene_index": int(d.get("scene", 0))
+    }))
+
+# ── Import tracks from Ableton (NEW) ──────────────────────────────────────────
+@app.route("/import/tracks", methods=["GET"])
+def import_tracks():
+    """Pull all track names and info from the current Ableton project."""
+    return jsonify(send_command("get_tracks"))
+
+# ── Knowledge ─────────────────────────────────────────────────────────────────
+@app.route("/knowledge", methods=["GET"])
+def knowledge():
+    """Load all knowledge files bundled with the app."""
+    import os
+    knowledge = {}
+    # Look for knowledge folder next to bridge.py
+    base = os.path.dirname(os.path.abspath(__file__))
+    knowledge_dir = os.path.join(base, "knowledge")
+    if os.path.isdir(knowledge_dir):
+        for fname in sorted(os.listdir(knowledge_dir)):
+            if fname.endswith(".txt"):
+                key = fname.replace(".txt", "")
+                try:
+                    with open(os.path.join(knowledge_dir, fname), "r") as f:
+                        knowledge[key] = f.read()
+                except:
+                    pass
+    return jsonify({"ok": True, "knowledge": knowledge})
 
 # ── Health ─────────────────────────────────────────────────────────────────────
 @app.route("/ping", methods=["GET"])
-def ping(): return jsonify({"ok": True, "message": "MixMind bridge v2 running"})
+def ping():
+    result = send_command("get_session_info")
+    return jsonify({
+        "ok":      result.get("ok", False),
+        "message": "MixMind bridge v4 (TCP)",
+        "ableton": result.get("ok", False),
+        "tempo":   result.get("tempo"),
+    })
 
 if __name__ == "__main__":
-    start_reply_listener()
-    print(f"MixMind bridge v2 → Ableton OSC :{ABLETON_OSC_PORT}")
+    print(f"MixMind bridge v4 → Ableton TCP :{ABLETON_PORT}")
     app.run(host="127.0.0.1", port=BRIDGE_PORT, debug=False, use_reloader=False)

@@ -1,0 +1,75 @@
+# RECOMMENDED PLUGINS & SETTINGS
+
+## Native Ableton Devices (Always Available)
+
+### EQ Eight
+- Use for surgical cuts and broad boosts
+- Tilt EQ mode for gentle broad shaping
+- Spectrum analyser: always enable to see what you're doing
+- Key parameters: Freq (Hz), Gain (dB), Q (bandwidth), Mode (Bell/Shelf/High-Pass etc)
+
+### Compressor  
+- Attack: fast (0.1ms) for transient control, slow (30ms) to let transients through
+- Release: auto for program material, manual for pumping effect
+- Ratio: 2:1 gentle, 4:1 medium, 8:1+ limiting
+- Threshold: set so GR meter moves 3–6dB on peaks
+
+### Glue Compressor
+- Best for bus/group compression and mix glue
+- Ratio 2:1 for subtle, 4:1 for more obvious
+- Soft Clip: adds subtle harmonic saturation — useful on drum buses
+- Attack 0.1–3ms | Release auto
+
+### Limiter
+- Always use True Peak mode for streaming delivery
+- Ceiling: set 0.3–1dB below 0dBFS depending on target
+- Lookahead: 1.5ms default
+
+### Saturator
+- Soft Clip: subtle warmth, good for bass and drums
+- Medium Curve: more obvious saturation for character
+- Hard Clip: aggressive, digital edge
+- Drive: 10–20% for subtle, 40%+ for obvious effect
+
+### Reverb (Legacy)
+- Room: 0.5–1s decay for drums and percussion
+- Hall: 1.5–3s decay for pads, vocals, leads
+- Pre-delay: 15–50ms to separate reverb from dry signal
+
+### Echo
+- Better than legacy reverb for creative effects
+- Sync to tempo for musical delays
+- Gate mode: rhythmic stuttering effects
+
+## Third-Party Plugins (Common)
+
+### FabFilter Pro-Q 3
+- Load via: device/add with name "Pro-Q 3"
+- Natural Phase mode for mixing, Linear Phase for mastering
+- Dynamic EQ mode: excellent for kick/bass clash
+
+### FabFilter Pro-L 2  
+- Load via: device/add with name "Pro-L 2"
+- Recommended preset: Transparent for streaming, Modern for club
+- True Peak mode: always on for streaming
+
+### FabFilter Pro-C 2
+- Load via: device/add with name "Pro-C 2"
+- Mastering mode for gentle bus compression
+- Punch mode for drums
+
+### Serum (Xfer Records)
+- Load via: device/add with name "Serum"
+- Best for: leads, pads, bass, arps
+- Wavetable synthesis — complex sounds
+
+### Massive X (Native Instruments)
+- Load via: device/add with name "Massive X"
+- Best for: bass, leads, dark pads
+
+## Plugin Loading Notes
+- MixMind loads plugins by searching your Ableton browser
+- Plugin must be installed and appear in your browser to load
+- After loading, use /track/devices to find device index
+- Use /device/parameters to see available parameters
+- Parameter indices vary by plugin — always read before setting

@@ -13,7 +13,13 @@
   "build": {
     "appId": "com.mixmind.app",
     "productName": "MixMind",
-    "copyright": "Copyright © 2026",
+    "protocols": [
+      {
+        "name": "MixMind",
+        "schemes": ["mixmind"]
+      }
+    ],
+    "copyright": "Copyright \u00a9 2026",
     "directories": {
       "output": "dist"
     },
@@ -23,38 +29,72 @@
       "renderer/**/*",
       "bridge.py",
       "requirements.txt",
-      "assets/**/*"
+      "assets/**/*",
+      "knowledge/**/*"
     ],
     "extraResources": [
-      { "from": "bridge.py",        "to": "bridge.py" },
-      { "from": "requirements.txt", "to": "requirements.txt" }
+      {
+        "from": "bridge.py",
+        "to": "bridge.py"
+      },
+      {
+        "from": "requirements.txt",
+        "to": "requirements.txt"
+      },
+      {
+        "from": "knowledge",
+        "to": "knowledge"
+      }
     ],
     "mac": {
       "category": "public.app-category.music",
       "icon": "assets/icon.png",
       "target": [
-        { "target": "dmg", "arch": ["arm64", "x64"] },
-        { "target": "zip", "arch": ["arm64", "x64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
       ],
       "darkModeSupport": true
     },
     "dmg": {
       "title": "MixMind",
       "background": null,
-      "window": { "width": 540, "height": 380 }
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     },
     "win": {
       "icon": "assets/icon.ico",
-      "target": [{ "target": "nsis" }]
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
     },
     "linux": {
       "category": "Audio",
       "icon": "assets/icon.png",
-      "target": [{ "target": "AppImage" }]
+      "target": [
+        {
+          "target": "AppImage"
+        }
+      ]
     },
     "publish": {
       "provider": "github",
-      "owner": "MitchCollinge",
+      "owner": "YOUR_GITHUB_USERNAME",
       "repo": "mixmind-releases"
     }
   },

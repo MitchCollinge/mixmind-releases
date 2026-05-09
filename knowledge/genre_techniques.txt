@@ -1,0 +1,173 @@
+# GENRE-SPECIFIC MIXING & PRODUCTION KNOWLEDGE
+
+## Electronic / Dance / House
+
+### Mix Priorities
+- Low end is EVERYTHING — kick and bass must be perfectly locked and separated
+- Sidechain compression: bass ducking to kick is genre-defining (not optional)
+- Energy builds through filter automation, not volume automation
+- The drop must hit hard — remove elements in the build, release them all at the drop
+- Stereo width: pads and atmospheres spread wide, kick/bass/lead stay centred
+
+### Electronic Kick Settings
+- Frequency: fundamental at 50–80Hz, punch at 100–150Hz, click at 3–5kHz
+- EQ: high-pass sub below 40Hz, boost 60–80Hz, cut 300–500Hz (remove boxiness), boost 3–5kHz click
+- Compression: fast attack (0.1ms) for click, medium release (50–80ms), 4:1 ratio
+- Target level: -6 to -4dB (0.60–0.71 in Ableton)
+- Transient: preserve it — the click/attack IS the groove
+
+### Electronic Bass / Sub
+- Sub sits below 80Hz — mono, felt not heard
+- Body lives 80–150Hz — this is what speakers reproduce
+- High-pass everything that isn't bass below 80–100Hz (using M/S: high-pass the side signal)
+- Sidechain to kick: 4:1 ratio, attack 1ms, release 80–120ms (releases just before next kick)
+- Saturate for harmonics: add even harmonics at 160–300Hz so it translates on small speakers
+
+### Sidechain Compression Setup (Ableton)
+1. On the bass/pad/synth track, insert a Compressor
+2. Set Sidechain input to the kick track
+3. Settings: ratio 4:1–8:1, attack 1ms, release 80–150ms, threshold until audible pumping
+4. Adjust release to match tempo: faster tempo = shorter release
+5. For subtle glue: ratio 2:1, 2–3dB GR. For pumping effect: 8:1, 8–12dB GR
+
+### House-Specific Production
+- Four-on-the-floor kick at 120–130 BPM — consistent, punchy, never too long
+- Off-beat bassline: root note on beat 1, movement on beats 2–4
+- Chord stabs: short, choppy (attack 1ms, decay 100ms, sustain 0, release short)
+- Open hi-hat on the "and" of 2 and 4
+- Filter sweeps during builds: automate low-pass filter from 200Hz up to 8kHz over 16 bars
+
+### Techno-Specific
+- Kick is longer and dirtier than house — distortion, saturation, compression layering
+- Industrial textures: field recordings, found sounds, noise layers at -24 to -18dB
+- Minimal melody — tension built through rhythmic density and filter movement
+- Everything should sidechain to the kick (aggressive — 6–8dB ducking)
+- Reverb: short and metallic on drums, long and industrial on pads
+
+---
+
+## Hip-Hop / Trap
+
+### Mix Priorities  
+- 808 bass and kick are the backbone — everything else supports them
+- Vocal clarity and presence over everything except the low end
+- Sampled or chopped elements must sit in the pocket — volume rides essential
+- Reverb on snare is genre-defining (long tail, high mix percentage)
+- Hi-hat rolls create groove and energy in the upper range
+
+### 808 Bass Production
+- Tune to the key of the track — this is critical, an out-of-tune 808 kills the vibe
+- Long decay (2–4 seconds): let it sustain and swell
+- Sub fundamental at 40–60Hz, body at 80–100Hz, "growl" at 150–250Hz
+- Saturate gently for translation on small speakers and earbuds
+- Sidechain: light compression from kick (2:1, release 200ms) — enough to feel, not pump
+- Level: loud, prominent, often the loudest element after the kick
+
+### Trap Snare
+- Heavy reverb tail (1.5–2.5s decay): the "trap" snare wash
+- Pitch: slightly higher than natural (pitch up 2–4 semitones for punch)
+- Snap: boost 4–6kHz for the crack
+- Body: boost 200Hz for fullness
+- Layer: acoustic snare + electronic snap layer often used
+- Level: -9 to -6dB, loud and proud
+
+### Trap Hi-Hats
+- 1/32nd hi-hat rolls: the defining trap texture
+- Velocity variation: automate velocity on every hit (some at 127, others at 60–80)
+- Panning: slight movement L/R on rolls creates stereo interest
+- Level: -18 to -12dB — never dominant, just texture
+- EQ: high-pass aggressively below 8kHz
+
+### Hip-Hop Vocals
+- Rap vocal: presence and clarity at 2–5kHz — must cut through
+- De-ess heavily: 6–8kHz can get harsh on aggressive rap delivery
+- Compression: 1176, moderate attack, fast release, 4:1 — controls peaks, preserves energy
+- Double/adlib tracks: hard panned (L/R at 0.6–0.8) for width
+- Parallel vocal compression: blend a heavily compressed parallel for consistency
+- Autotune: even if subtle, most modern rap vocals use it for pitch centering
+
+---
+
+## Pop
+
+### Mix Priorities
+- Vocal is the product — it must be perfect, clear, emotional, present
+- Everything else serves the vocal — if something competes, it gets cut
+- Width and space: modern pop is wide, but center is sacred (kick, bass, lead vox)
+- Spectral clarity: every element has a clear frequency home, nothing muddy
+- Emotional arc: builds, drops, bridges must feel dramatically different
+
+### Modern Pop Vocal Chain
+- De-ess FIRST: control sibilance before any other processing
+- HPF: 80–100Hz high-pass to remove proximity effect and room rumble
+- Transparent compression: 2–3dB GR, slow attack, auto release — gentle control
+- EQ: boost 3–5kHz for presence, subtle cut at 300Hz if muddy, cut sibilance at 7–9kHz
+- Parallel compression: blend a compressed version for consistency in quiet passages
+- Doubling: pitch-shifted copy (±15 cents) panned slightly L/R adds width without distortion
+- Reverb: short plate (0.8s) for natural ambience, long hall (3s) on the send return
+
+### Pop Production
+- Less is more: Serban Ghenea builds Troye Sivan's mix from ~10 main elements, not 90
+- Verse should feel different from chorus — not just louder
+- Filter automation: close filter in verse, open in chorus for lift
+- Remove elements in pre-chorus for the "lift" when chorus hits
+- Automation on EVERYTHING: volume, filter, reverb sends, panning
+
+---
+
+## Rock / Band
+
+### Mix Priorities
+- Drum room sound defines rock mixes — big, live, natural
+- Guitar tones are the primary character — EQ to complement, not correct
+- Vocal drives everything but drums/guitars give it the emotional power
+- Parallel compression on drums: essential for modern rock
+
+### Rock Drums
+- Overhead mics create the stereo picture — trust them
+- Kick: boost 60Hz for thump, cut 400Hz for boom, boost 4kHz for beater click
+- Snare: boost 200Hz for crack, cut 400–600Hz for boxiness, boost 5–8kHz for snap
+- Room mics: heavy compression for the "controlled destruction" sound (ratio 10:1, slow attack, fast release)
+- Parallel compression: blend room/parallel bus for that big rock room sound
+
+### Rock Guitars
+- Always record in stereo if possible — even if tracking mono, double-track
+- Hard pan the pair: L/R at 0.7–1.0
+- EQ: high-pass at 80–100Hz (remove low end), cut 400–600Hz (remove mud), boost 3–5kHz (add presence)
+- Never boost bass on guitars — they fight the bass guitar and kick
+- Saturation: gentle on clean guitars, aggressive on distorted
+
+---
+
+## R&B / Soul
+
+### Mix Priorities
+- Warmth and space — not clinical, not harsh
+- Vocal emotion: the performer's nuance must come through in every phrase
+- Low-end groove: kick and bass moving together, soulful not mechanical
+- Reverb is more prominent than pop — longer tails, more lush
+
+### R&B Vocal Treatment
+- Smooth, controlled compression: LA-2A optical style — transparent, warm
+- Gentle de-ess (set subtly — sibilance is often expressiveness in R&B)
+- Warmth EQ: slight boost at 150–200Hz for chest resonance
+- Presence: gentle boost at 2–4kHz — not harsh
+- Long reverb on a parallel send: blend 15–25% for space without losing intimacy
+- Delay: 1/8th note slap, high-pass the return at 1kHz, blend subtly
+
+---
+
+## Film / Cinematic
+
+### Mix Priorities
+- Dynamic range is the story — loud parts must feel louder against quiet parts
+- Dialogue intelligibility above everything
+- Sound design elements need space to breathe
+- EBU R128 standard: -24 LUFS integrated, -2dBTP true peak
+
+### Cinematic Mix Rules
+- Never compress the mix bus during film mixing — preserve dynamics for impact
+- "The quiet makes the loud louder" — resist the urge to fill every moment
+- Low end: LFE channel (bass below 80Hz) is separate in 5.1 — keep stereo mix bass controlled
+- Reverb should match the visual space (large cathedral = large reverb, small room = small reverb)
+- Foley and sound design: -24 to -18dB subtly supports without drawing attention

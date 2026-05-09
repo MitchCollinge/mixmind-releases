@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeImage } = require('electron')
 const path   = require('path')
-const { spawn, execSync } = require('child_process')
+const { spawn, execSync, execFile } = require('child_process')
 const fs     = require('fs')
 const http   = require('http')
 
@@ -52,6 +52,7 @@ const BRIDGE_HOST    = '127.0.0.1'
 const BRIDGE_URL     = `http://${BRIDGE_HOST}:${BRIDGE_PORT}`
 const PING_INTERVAL  = 3000   // ms between bridge health checks
 const BRIDGE_TIMEOUT = 8000   // ms to wait for bridge to start
+const MIXMIND_PROTOCOL = 'mixmind'
 
 let mainWindow   = null
 let bridgeProc   = null
@@ -190,7 +191,7 @@ ipcMain.handle('bridge-call', async (event, { endpoint, method = 'POST', body = 
         'Content-Type':   'application/json',
         'Content-Length': Buffer.byteLength(payload),
       } : {},
-      timeout: 5000,
+      timeout: 60000,
     }
 
     const req = http.request(options, (res) => {
@@ -238,6 +239,58 @@ function notifyRenderer(channel, data) {
     mainWindow.webContents.send(channel, data)
   }
 }
+
+// ── mixmind:// URL scheme (open/focus app from Ableton Remote Script or OS) ─
+function registerMixmindProtocol() {
+  try {
+    if (process.defaultApp) {
+      if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient(MIXMIND_PROTOCOL, process.execPath, [path.resolve(process.argv[1])])
+      }
+    } else {
+      app.setAsDefaultProtocolClient(MIXMIND_PROTOCOL)
+    }
+  } catch (e) {
+    console.warn('mixmind:// registration:', e.message)
+  }
+}
+
+function handleDeepLinkArgv(argv) {
+  if (!argv || !argv.length) return
+  const hit = argv.find((a) => typeof a === 'string' && a.startsWith(`${MIXMIND_PROTOCOL}://`))
+  if (hit) focusMainWindow()
+}
+
+function focusMainWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+  } else {
+    createWindow()
+  }
+}
+
+const gotSingleInstanceLock = app.requestSingleInstanceLock()
+if (!gotSingleInstanceLock) {
+  app.quit()
+  process.exit(0)
+}
+
+app.on('second-instance', (event, commandLine) => {
+  event.preventDefault()
+  handleDeepLinkArgv(commandLine)
+  focusMainWindow()
+})
+
+if (process.platform === 'darwin') {
+  app.on('open-url', (event, url) => {
+    event.preventDefault()
+    if (typeof url === 'string' && url.startsWith(`${MIXMIND_PROTOCOL}://`)) focusMainWindow()
+  })
+}
+
+registerMixmindProtocol()
 
 // ── Create window ─────────────────────────────────────────────────────────────
 function createWindow() {
@@ -304,6 +357,7 @@ function buildMenu() {
 // ── App lifecycle ─────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   createWindow()
+  handleDeepLinkArgv(process.argv)
   startBridge()
 
   // Check for updates 5 seconds after launch (only in packaged app)
@@ -338,6 +392,37 @@ ipcMain.handle('check-for-updates', async () => {
 })
 
 ipcMain.handle('get-version', () => app.getVersion())
+
+ipcMain.handle('focus-app-window', () => {
+  focusMainWindow()
+  return true
+})
+
+/** Open Ableton Live (macOS / common install paths). */
+ipcMain.handle('open-ableton-live', async () => {
+  if (process.platform !== 'darwin') {
+    return { ok: false, error: 'Use Start Menu on Windows to launch Live' }
+  }
+  const candidates = [
+    'Ableton Live 12 Suite',
+    'Ableton Live 12 Standard',
+    'Ableton Live 11 Suite',
+    'Ableton Live 12',
+  ]
+  return new Promise((resolve) => {
+    const tryOpen = (i) => {
+      if (i >= candidates.length) {
+        resolve({ ok: false, error: 'Could not find Ableton Live via open -a' })
+        return
+      }
+      execFile('/usr/bin/open', ['-a', candidates[i]], (err) => {
+        if (err) tryOpen(i + 1)
+        else resolve({ ok: true, app: candidates[i] })
+      })
+    }
+    tryOpen(0)
+  })
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

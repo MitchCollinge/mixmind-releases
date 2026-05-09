@@ -1,0 +1,37 @@
+# MIXING PHILOSOPHY & PREFERENCES
+
+## General Approach
+- Always gain stage before reaching for EQ or compression
+- Mix at low volumes (around 75dB SPL) and check at loud volumes for excitement
+- Check in mono regularly — if it sounds good in mono, it sounds great in stereo
+- Leave 3–6dB of headroom on the master bus before mastering
+- Reference against commercial tracks in the same genre frequently
+
+## Drum Treatment
+- Kick and bass should occupy different frequency ranges — sidechain or duck if needed
+- Parallel compress drums on a return track for punch without killing dynamics
+- Hi-hats and cymbals: high-pass aggressively below 8kHz, keep airy not harsh
+- Snare needs body (200Hz) and snap (4–8kHz) — cut the boxiness at 400–600Hz
+- Drum bus glue compression: Glue Compressor, ratio 2:1, slow attack, auto release, 1–3dB GR
+
+## Bass Treatment
+- Sub bass should be mono below 80–100Hz — use Utility to check
+- Bass and kick: carve space using dynamic EQ or sidechain compression
+- Keep bass volume consistent — automation if needed for variation in arrangement
+- Low-end check: always A/B on headphones and speakers
+
+## Stereo Field Rules
+- Kick, bass, sub, lead vocal, lead synth → center always
+- Pads, guitars, atmospheres → wide (±0.3–0.6)
+- Nothing hard panned unless intentional (guitar doubles at ±0.8–1.0)
+- Master bus: check width with Utility set to mono — lose anything important?
+
+## Automation
+- Volume rides on vocals are essential — automate every phrase
+- Filter automation on pads/synths adds movement without changing the mix
+- Reverb sends can be automated for builds — pull back on verses, push on choruses
+
+## Return/Send Tracks
+- Reverb return: high-pass at 300–400Hz to keep it clean, not muddy
+- Delay return: sync to tempo, use ping-pong for width, filter highs
+- Saturation/harmonic exciter on a parallel return for warmth

@@ -1,0 +1,143 @@
+# FAMOUS MASTERING ENGINEERS — TECHNIQUES & PHILOSOPHY
+
+## Bob Ludwig (Gateway Mastering)
+Credits: Led Zeppelin, Springsteen, Rolling Stones, U2, Metallica, Radiohead, Nirvana, Tool
+13 Grammy Awards. ~9,000 albums mastered.
+Philosophy: Mastering is the final creative step. Preserve dynamics. Every song on its own merits.
+
+### Ludwig's Core Principles
+- Goal: make a recording sound better at ANY playback level — not just loud
+- Dynamic masters always sound better than loud ones when volume is adjusted up
+- Over-compression causes listener fatigue — brain habituates to unchanging loud signals
+- Research (Susan Rogers, Berklee): dynamic music keeps neurons firing. Loud static music shuts them off.
+- Never one-size-fits-all — serve the emotional requirement of each specific song
+- Louder masters sound WORSE on FM radio — broadcast compressors already handle loudness
+- AAC encoding creates new inter-sample peaks from hot digital masters — back off 0.5–0.7dB before encode
+
+### Ludwig's Top Pre-Master Problems to Fix
+1. Vocal not prominent enough — "the vocal is everything to the success of a song"
+   - Always submit +0.5dB and +1dB vocal raise mixes as backups
+2. Uncontrolled sibilance — must be fixed in the mix, not mastering (de-essing in mastering compromises the whole track)
+3. Bass not locked to kick — creates muddy, unfocused low end
+4. Mix too loud — no headroom for mastering to work with
+
+### Ludwig EQ Approach
+- Careful, surgical moves — dip problematic bass notes, surgical corrections for clarity
+- No more than ±3dB on most mastering EQ moves
+- Gentle high-pass below 20–30Hz (remove inaudible sub rumble only)
+- Subtle broad moves that serve the music's emotional arc
+
+---
+
+## Bernie Grundman (Bernie Grundman Mastering, Hollywood)
+Credits: Michael Jackson (Thriller, Off The Wall), Prince (Purple Rain), Dr. Dre (The Chronic), Beck
+Pioneer of minimal signal path mastering. Custom-built all his own gear.
+Philosophy: Enhance emotional impact. Minimise the signal chain. Let music breathe.
+
+### Grundman's Core Philosophy
+- Minimal signal path — custom consoles built to reduce coloration
+- Everything bypassable — only add processing when it genuinely serves the music
+- Preserve natural dynamic range — avoid unnecessary compression at all costs
+- "EQ can create tension or sweetness — whatever the music needs"
+- Music's goal: help the listener fully realise the intention of the music
+
+### Grundman EQ
+- 24-band custom graphic EQ with 0.5dB gain steps near unity
+- Surgical approach — tiny moves that reshape tonal balance
+- Sub-bass control critical for vinyl — prevent inner groove distortion
+- Midrange separation key for complex multi-layered mixes
+- Gentle HF boosts for air and presence
+
+### Grundman on Dynamics
+- Dense G-funk (Dr. Dre Chronic): specialized EQ to control sub-bass rumble for vinyl while preserving streetwise clarity
+- Prince Purple Rain: enhanced guitar tones and vocal presence, managed noise floor
+- Rock/alternative: preserve transients and dynamic contrast
+
+---
+
+## Ian Shepherd — Streaming-Era Intelligence
+Philosophy: "Dynamic music sounds better." The loudness war is over.
+
+### Modern Streaming Mastering Rules
+- Spotify, Apple Music, YouTube, Tidal ALL normalise loudness — loud masters get turned DOWN
+- A dynamic master at -14 LUFS sounds better than -8 LUFS after normalisation
+- Dynamics are now REWARDED — punchy transients and musical LRA win over brickwalled masters
+- True Peak limiting is essential: inter-sample peaks cause distortion in AAC/MP3 encoding
+- Measure integrated LUFS before limiting — if mix is already -16 LUFS, gentle limiting to -14 preserves dynamics
+- Leave LRA (Loudness Range) of 6dB minimum for musical feel
+
+### Streaming Platform Targets (2026)
+- Spotify: -14 LUFS integrated, -1dBTP true peak
+- Apple Music: -16 LUFS integrated (louder tracks turned down more)
+- YouTube: -14 LUFS integrated, -1dBTP
+- Tidal: -14 LUFS integrated
+- Beatport/Club: -9 to -10 LUFS (not normalised — loud is expected here)
+- Amazon Music: -14 LUFS integrated
+
+### PLR (Peak-to-Loudness Ratio) Guide
+- PLR 8+: dynamic and natural (ideal for streaming)
+- PLR 6–8: competitive but musical
+- PLR 4–6: modern pop/electronic (acceptable)
+- PLR below 4: over-compressed, will cause listener fatigue
+
+---
+
+## Bob Katz (Digital Domain)
+Author of "Mastering Audio" — the definitive mastering textbook
+Philosophy: Musical mastering serves the art. Technical mastering serves the format.
+
+### K-System Metering
+- K-20: classical, audiophile, film (-20 RMS target, most dynamic)
+- K-14: pop, rock, R&B (-14 RMS target, standard commercial)
+- K-12: broadcast, television (-12 RMS target)
+Use K-14 for most commercial music: peaks hit 0dBFS, program averages around -14 RMS
+
+### Katz Mastering Chain Order
+1. High-pass filter (remove sub-rumble below 20Hz)
+2. EQ (shape tone before compression)
+3. Compressor (control dynamics after tonal shaping)
+4. Limiter (final ceiling)
+
+### Katz EQ Principles
+- EQ before compression — shape tone first, then control dynamics
+- Gentle low shelf at 40–80Hz adds weight without muddiness
+- High shelf at 12–16kHz adds air without harshness
+- Mid cut at 2–4kHz reduces harshness on bright mixes
+- Never boost AND cut the same frequency range simultaneously
+
+### Katz Compression in Mastering
+- Nearly invisible: 1–2dB GR maximum on most material
+- Slow attack (50–100ms): let transients through, compress body
+- Medium release (200–500ms): musical, follows the tempo
+- Ratio 2:1 to 4:1: gentle shaping
+- Character matches genre: tube warmth for organic, clean digital for pop
+
+---
+
+## Greg Calbi & Steve Fallone (Sterling Sound)
+Credits: Taylor Swift, Arcade Fire, The National, LCD Soundsystem, Bon Iver, Vampire Weekend
+Sterling Sound philosophy: serve the artist's vision. Dynamics over loudness.
+
+### Sterling Sound Targets by Genre
+- Indie rock/alternative: DR8–DR12 target range
+- Pop: DR6–DR9 if genre energy demands it
+- Electronic/Dance: DR6–DR8 competitive
+- Always A/B with reference tracks from same genre and platform target
+
+---
+
+## Key Mastering Insights — All Engineers Agree On
+
+### Before Mastering
+- Mix should peak at -6 to -3dBFS on the master fader — NO brickwalling, NO limiting on the mix bus
+- Submit 24-bit WAV or AIFF — never MP3 to mastering
+- Check mono compatibility — phase issues in low end will destroy the master
+- Vocal level must be right in the mix — mastering cannot fix a buried vocal without compromising everything else
+- Sibilance controlled in the mix — de-essing in mastering affects the entire track
+
+### Universal Mastering Rules
+- Less processing is almost always better — every device in the chain adds noise and color
+- Reference against commercial tracks in the same genre throughout the process
+- Check on multiple systems: studio monitors, headphones, laptop speakers, phone
+- The master should sound good at LOW volume AND high volume — if only loud, it's over-compressed
+- Preserve what makes the mix special — don't homogenize it to sound "professional"
